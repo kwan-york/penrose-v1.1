@@ -24,19 +24,21 @@ function HeaderApp({ list, currentPage }) {
                 </a>
             </div>
             <nav className={isMobileMenuOpen ? "mobile-menu-open" : ""}>
-                <ul>
-                    {list.map((e, i) => (
-                        <li key={`${i}-th header item`}>
-                            <a
-                                href={e.link}
-                                className={activeLink === e.name ? "active" : ""}
-                                onClick={() => handleLinkClick(e.name)}
-                            >
-                                {e.name}
-                            </a>
-                        </li>
-                    ))}
-                </ul>
+                <div className="nav-links">
+                    <ul>
+                        {list.map((e, i) => (
+                            <li key={`${i}-th header item`}>
+                                <a
+                                    href={e.link}
+                                    className={activeLink === e.name ? "active" : ""}
+                                    onClick={() => handleLinkClick(e.name)}
+                                >
+                                    {e.name}
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
                 <div className="header-actions">
                     <a href="#" className="btn btn-2 btn-small">Sign In</a>
                 </div>
