@@ -91,6 +91,111 @@
             opacity: 0.8;
             will-change: transform;
         }
+        /* --- RESET & BASE STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            background-color: #0f172a; /* Slate 900 */
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; /* Prevent scroll during intro */
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- LANDING PAGE (Placeholder) --- */
+        #landing-page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh; /* For demo purposes */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            background: #f8fafc; /* Light bg to show contrast with reveal */
+            color: #334155;
+            opacity: 0; /* Hidden initially */
+            transform: scale(0.95);
+        }
+
+        .dashboard-mockup {
+            text-align: center;
+        }
+
+        /* --- INTRO OVERLAY --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            cursor: pointer; /* Suggests interactivity */
+        }
+
+        /* Skip tooltip */
+        .skip-hint {
+            position: absolute;
+            bottom: 30px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.4;
+            color: #94a3b8;
+            transition: opacity 0.3s;
+        }
+
+        /* Text Containers */
+        .msg-container {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            /* Initially hidden, controlled by JS */
+            opacity: 0; 
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 4rem); /* Responsive typography */
+            font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
+        }
+
+        /* --- TEXT STYLING CLASSES --- */
+        /* Standard text wrapper for animation targets */
+        .word {
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: bottom;
+        }
+
+        .letter {
+            display: inline-block;
+            line-height: 1em;
+            transform-origin: 50% 100%;
+        }
+
+        /* KEYWORD HIGHLIGHTING */
+        /* Makes keywords pop with a gradient and distinct look */
+        .keyword .letter {
+            color: transparent;
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%); /* Cyan to Indigo */
+            -webkit-background-clip: text;
+            background-clip: text;
+            text-shadow: 0px 0px 20px rgba(56, 189, 248, 0.3); /* Subtle glow */
+            font-weight: 800; /* Extra bold */
+        }
 
     </style>
 <body>
@@ -119,6 +224,8 @@
             <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -171,6 +278,164 @@
                 requestAnimationFrame(animate);
             }
             animate();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- 1. PREPARATION: SPLIT TEXT INTO LETTERS ---
+            // This helper wraps every letter in a span class="letter" 
+            // while preserving the .keyword parent structure.
+            
+            function wrapLetters(element) {
+                // We select all text nodes, including those inside .keyword spans
+                // We need to carefully handle the DOM structure
+                const processNode = (node) => {
+                    if (node.nodeType === 3) { // Text node
+                        const text = node.textContent;
+                        // Skip empty whitespace nodes (formatting)
+                        if (!text.trim()) return; 
+                        
+                        const frag = document.createDocumentFragment();
+                        [...text].forEach(char => {
+                            const span = document.createElement('span');
+                            span.className = 'letter';
+                            span.textContent = char === ' ' ? '\u00A0' : char; // Handle spaces
+                            frag.appendChild(span);
+                        });
+                        node.replaceWith(frag);
+                    } else if (node.nodeType === 1) { // Element node
+                        Array.from(node.childNodes).forEach(processNode);
+                    }
+                };
+                processNode(element);
+            }
+
+            // Apply wrapping to our containers
+            const p1 = document.querySelector('.phase-1 h1');
+            const p2 = document.querySelector('.phase-2 h1');
+            wrapLetters(p1);
+            wrapLetters(p2);
+
+            // --- 2. ANIMATION TIMELINE ---
+            const tl = anime.timeline({
+                autoplay: true,
+                easing: 'easeOutExpo' // High-end smooth easing
+            });
+
+            // Selectors
+            const overlay = document.querySelector('#intro-overlay');
+            const landingPage = document.querySelector('#landing-page');
+            const body = document.body;
+
+            // --- SEQUENCE DEFINITION ---
+
+            // >> PHASE 1: ENTER
+            tl.add({
+                targets: '.phase-1',
+                opacity: 1,
+                duration: 100 // Instant opacity for container, children animate
+            })
+            .add({
+                targets: '.phase-1 .letter',
+                translateY: ["1.2em", 0], // Slide up
+                translateZ: 0,
+                opacity: [0, 1],
+                // DISTINCT KEYWORD LOGIC:
+                // If the parent is a keyword, scale it down from 1.5 (impact effect)
+                // If regular text, scale is 1.
+                scale: function(el) {
+                    return el.parentElement.classList.contains('keyword') ? [1.5, 1] : [1, 1];
+                },
+                // Blur effect for keywords
+                filter: function(el) {
+                     return el.parentElement.classList.contains('keyword') ? ['blur(10px)', 'blur(0px)'] : ['blur(0px)', 'blur(0px)'];
+                },
+                easing: "easeOutExpo",
+                duration: 1400,
+                delay: anime.stagger(40) // Letter stagger
+            })
+            // >> PHASE 1: HOLD & EXIT
+            .add({
+                targets: '.phase-1',
+                opacity: 0,
+                translateY: "-20px", // Slight drift up on exit
+                filter: 'blur(10px)',
+                duration: 800,
+                easing: "easeInQuad",
+                delay: 1500 // Read time
+            })
+
+            // >> PHASE 2: ENTER
+            .add({
+                targets: '.phase-2',
+                opacity: 1,
+                duration: 100
+            }, "-=200") // Overlap slightly
+            .add({
+                targets: '.phase-2 .letter',
+                translateY: ["1.5em", 0],
+                opacity: [0, 1],
+                // Stronger effect for Phase 2 keywords
+                color: function(el) {
+                     return el.parentElement.classList.contains('keyword') ? ['#ffffff', 'transparent'] : null; 
+                     // Flash white then go to gradient transparent
+                },
+                easing: "easeOutExpo",
+                duration: 1600,
+                delay: anime.stagger(30, {start: 100})
+            })
+            // >> PHASE 2: HOLD
+            .add({
+                duration: 1800 // Hold specifically for Phase 2
+            })
+
+            // >> OUTRO: REVEAL LANDING PAGE
+            .add({
+                targets: '#intro-overlay',
+                translateY: '-100%', // Slide up curtain effect
+                duration: 1000,
+                easing: 'easeInOutQuart',
+                update: function(anim) {
+                    // Start fading in the landing page as overlay slides up
+                    if(anim.progress > 20) {
+                        landingPage.style.opacity = (anim.progress - 20) / 80;
+                        landingPage.style.transform = `scale(${0.95 + (0.05 * (anim.progress/100))})`;
+                    }
+                },
+                complete: function() {
+                    // Cleanup
+                    overlay.style.display = 'none';
+                    body.style.overflow = 'auto'; // Re-enable scroll
+                    landingPage.style.opacity = 1;
+                    landingPage.style.transform = 'scale(1)';
+                }
+            });
+
+            // --- 3. SKIP LOGIC (DOUBLE CLICK) ---
+            
+            function skipIntro() {
+                // Prevent multiple triggers
+                if (tl.completed) return;
+                
+                tl.pause();
+                
+                // Animate overlay out immediately
+                anime({
+                    targets: '#intro-overlay',
+                    opacity: 0,
+                    duration: 500,
+                    easing: 'linear',
+                    complete: function() {
+                        overlay.style.display = 'none';
+                        body.style.overflow = 'auto';
+                        
+                        // Show landing page
+                        landingPage.style.opacity = 1;
+                        landingPage.style.transform = 'scale(1)';
+                    }
+                });
+            }
+
+            document.body.addEventListener('dblclick', skipIntro);
         });
     </script>
     <script type="module" src="./src/index/main.jsx"></script>
