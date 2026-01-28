@@ -23,6 +23,8 @@
   --shadow-soft: 0 4px 15px rgba(0, 0, 0, 0.1);
   --shadow-medium: 0 8px 25px rgba(0, 0, 0, 0.15);
   --border-radius: 6px;
+  --logo-width: 150px;
+  --header-h-padding: 15px;
 }
 
 * {
@@ -57,6 +59,7 @@ body {
   background-color: transparent;
   color: var(--primary-color);
   border: 2px solid var(--primary-color);
+  min-width: 80px;
 }
 
 .btn-2:hover {
@@ -73,7 +76,7 @@ body {
 /* --- Responsive Logo Size --- */
 .logo-image {
   max-width: 100%;
-  width: 150px;
+  width: var(--logo-width);
   height: auto;
   display: block;
 }
@@ -95,10 +98,10 @@ body {
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 15px;
+  padding: 0 var(--header-h-padding);
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 #main-header .logo {
@@ -109,15 +112,13 @@ body {
 }
 
 #main-header nav {
-    flex-grow: 1;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 2rem;
+    justify-content: center;
+    flex-grow: 1;
 }
 
 #main-header .nav-links {
-    flex-grow: 1;
     display: flex;
     justify-content: center;
 }
@@ -167,6 +168,8 @@ body {
 #main-header .header-actions {
   display: flex;
   align-items: center;
+  position: absolute;
+  right: var(--header-h-padding);
 }
 #main-header .header-actions .btn {
   margin-left: 1rem;
@@ -215,61 +218,154 @@ body {
   top: 0;
 }
 
-/* Responsive Design */
-@media (max-width: 992px) {
-  #main-header nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100vh;
-    background-color: rgba(248, 249, 250, 0.98);
-    backdrop-filter: blur(5px);
-    z-index: 1000;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem 0;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-100%);
-    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s ease;
+@media (min-width: 993px) {
+
+  #main-header .nav-links {
+
+    /* Compensate for the logo width to achieve true center */
+
+    transform: translateX(calc(var(--logo-width) / -2));
+
   }
+
+}
+
+
+
+/* Responsive Design */
+
+@media (max-width: 992px) {
+
+  #main-header .nav-bar {
+
+    justify-content: space-between;
+
+  }
+
+
+
+  #main-header nav {
+
+    position: fixed;
+
+    top: 0;
+
+    left: 0;
+
+    width: 100%;
+
+    height: 100vh;
+
+    background-color: rgba(248, 249, 250, 0.98);
+
+    backdrop-filter: blur(5px);
+
+    z-index: 1000;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 1rem 0;
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    transform: translateY(-100%);
+
+    transition: transform 0.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s ease;
+
+  }
+
+
 
   #main-header nav.mobile-menu-open {
+
     opacity: 1;
+
     visibility: visible;
+
     transform: translateY(0);
+
   }
+
+
 
   #main-header nav ul {
+
     flex-direction: column;
+
     width: 100%;
+
     padding: 0;
+
     margin: 0;
+
   }
+
+
 
   #main-header nav ul li {
+
     margin: 0;
+
     text-align: center;
+
     padding: 1rem 0;
+
     width: 100%;
+
   }
+
   
+
   #main-header nav ul li a {
+
     font-size: 1.5rem;
+
   }
+
+
 
   #main-header nav .header-actions {
+
+    position: static;
+
     padding-top: 2rem;
-  }
-  
-  #main-header nav .header-actions .btn {
-    margin-left: 0;
+
   }
 
-  .mobile-nav-toggle {
-    display: block;
+  
+
+  #main-header nav .header-actions .btn {
+
+    margin-left: 0;
+
   }
+
+
+
+  .mobile-nav-toggle {
+
+    display: block;
+
+  }
+
+}
+
+
+
+nav {
+
+  li {
+
+    min-width: 80px;
+
+  }
+
 }

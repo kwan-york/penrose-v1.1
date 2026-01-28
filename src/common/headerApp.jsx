@@ -39,10 +39,10 @@ function HeaderApp({ list, currentPage }) {
                         ))}
                     </ul>
                 </div>
+            </nav>
                 <div className="header-actions">
                     <a href="#" className="btn btn-2 btn-small">Sign In</a>
                 </div>
-            </nav>
             <button
                 className={`mobile-nav-toggle ${isMobileMenuOpen ? "active" : ""}`}
                 aria-label="Toggle navigation"
