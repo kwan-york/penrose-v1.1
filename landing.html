@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Intro with Preferences</title>
+    <title>Dashboard with Persistent Settings</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -15,12 +15,12 @@
             background-color: #0f172a;
             color: #ffffff;
             font-family: 'Inter', sans-serif;
-            overflow: hidden; /* Locked during intro */
+            overflow: hidden; 
             height: 100vh;
             width: 100vw;
         }
 
-        /* --- LANDING PAGE --- */
+        /* --- LANDING PAGE / DASHBOARD --- */
         #landing-page {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100vh;
@@ -46,10 +46,9 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            perspective: 1000px; /* For 3D text */
+            perspective: 1000px; 
         }
 
-        /* Skip Hint (Bottom) */
         .skip-hint {
             position: absolute;
             bottom: 30px;
@@ -60,84 +59,85 @@
             color: #94a3b8;
         }
 
-        /* --- NOTIFICATION TOAST (Top Right) --- */
+        /* --- PERSISTENT NOTIFICATION (Top Right) --- */
+        /* Note: z-index is 50 to sit above dashboard but below intro overlay (if overlay was active) */
         #pref-toast {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: 280px;
-            background: rgba(30, 41, 59, 0.9); /* Slate 800 with opacity */
-            backdrop-filter: blur(8px);
-            border: 1px solid #334155;
+            width: 300px;
+            background: #ffffff; /* White background for dashboard contrast */
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            padding: 16px;
-            z-index: 1000;
+            padding: 20px;
+            z-index: 50; 
             font-size: 0.85rem;
-            color: #e2e8f0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            color: #475569;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             
-            /* Animation Start State */
-            transform: translateX(120%); 
-            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            /* Hidden State */
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #pref-toast.show {
             transform: translateX(0);
+            opacity: 1;
         }
 
         .toast-header {
             display: flex;
             justify-content: space-between;
             align-items: start;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
-        .toast-title { font-weight: 600; color: #fff; }
+        .toast-title { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
         .toast-close { 
             background: none; border: none; color: #94a3b8; 
-            cursor: pointer; font-size: 1.2rem; line-height: 0.8;
+            cursor: pointer; font-size: 1.4rem; line-height: 0.6;
         }
-        .toast-close:hover { color: #fff; }
+        .toast-close:hover { color: #334155; }
 
         .toast-actions {
-            margin-top: 12px;
+            margin-top: 15px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
         }
 
-        /* Action Buttons/Inputs */
         .btn-disable {
-            background: #334155;
+            background: #0f172a;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 0.75rem;
+            font-weight: 600;
             transition: background 0.2s;
             text-align: center;
         }
-        .btn-disable:hover { background: #475569; }
+        .btn-disable:hover { background: #334155; }
 
         .chk-label {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.75rem;
-            color: #cbd5e1;
+            color: #64748b;
             cursor: pointer;
         }
 
         /* --- TEXT STYLING --- */
         .msg-container { text-align: center; padding: 0 20px; }
-        
-        h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; }
+        h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; display:block; width:100%; }
         h2 { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; margin-top: 1rem; }
-
         .word { display: inline-block; white-space: nowrap; }
         .letter { display: inline-block; transform-origin: 50% 100%; transform-style: preserve-3d; backface-visibility: hidden; }
-
         .keyword .letter {
             background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
             -webkit-background-clip: text;
@@ -152,9 +152,29 @@
 
     <div id="landing-page">
         <div class="dashboard-mockup">
-            <h1>Dashboard Loaded</h1>
-            <p style="margin-top: 1rem; color: #64748b;">Settings applied based on user preference.</p>
-            <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; padding:10px; cursor:pointer;">Reset All Preferences</button>
+            <h1 style="color: #0f172a;">Dashboard Active</h1>
+            <p style="margin-top: 1rem; color: #64748b;">Welcome to your workspace.</p>
+            <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; padding:10px 20px; cursor:pointer; background:#e2e8f0; border:none; border-radius:4px;">
+                Reset Preferences & Reload
+            </button>
+        </div>
+    </div>
+
+    <div id="pref-toast">
+        <div class="toast-header">
+            <span class="toast-title">Intro Settings</span>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+        <p style="font-size: 0.8rem; line-height: 1.5;">
+            Did you know? You can <strong>Double Click</strong> during the intro to skip it instantly.
+        </p>
+        <div class="toast-actions">
+            <button class="btn-disable" id="btn-stop-anim">
+                Disable intro on next visit
+            </button>
+            <label class="chk-label">
+                <input type="checkbox" id="chk-no-toast"> Don't show this tip again
+            </label>
         </div>
     </div>
 
@@ -166,62 +186,54 @@
         <div class="skip-hint">Double click to skip</div>
     </div>
 
-    <div id="pref-toast">
-        <div class="toast-header">
-            <span class="toast-title">Animation Controls</span>
-            <button class="toast-close" onclick="hideToast()">&times;</button>
-        </div>
-        <p style="font-size: 0.8em; color: #94a3b8; margin-bottom: 10px;">
-            Tip: Double-click anywhere to skip this intro instantly.
-        </p>
-        <div class="toast-actions">
-            <button class="btn-disable" id="btn-stop-anim">
-                Never play this animation again
-            </button>
-            <label class="chk-label">
-                <input type="checkbox" id="chk-no-toast"> Do not show this message next time
-            </label>
-        </div>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- 0. PREFERENCE CHECK (Local Storage) ---
+            // --- CONSTANTS & DOM ---
             const overlay = document.querySelector('#intro-overlay');
             const landingPage = document.querySelector('#landing-page');
             const toast = document.querySelector('#pref-toast');
             
-            // Preference Keys
             const PREF_SKIP_INTRO = 'pref_skip_intro';
             const PREF_HIDE_TOAST = 'pref_hide_toast';
 
-            // Function to reveal landing page immediately (No animation)
-            const showLandingPageInstant = () => {
+            // --- 1. INITIALIZATION CHECK ---
+            
+            // If user previously clicked "Disable intro"
+            if (localStorage.getItem(PREF_SKIP_INTRO) === 'true') {
                 overlay.style.display = 'none';
                 document.body.style.overflow = 'auto';
                 landingPage.style.opacity = 1;
                 landingPage.style.transform = 'scale(1)';
-            };
-
-            // CHECK 1: Should we skip the intro entirely?
-            if (localStorage.getItem(PREF_SKIP_INTRO) === 'true') {
-                showLandingPageInstant();
-                return; // Stop script execution here
+                return; // Exit script, no animation, no toast
             }
 
-            // --- 1. SETUP UI & LISTENERS ---
-            
-            // Listener: "Never play again" button
+            // --- 2. TOAST LOGIC ---
+
+            function showToast() {
+                // Only show if user hasn't ticked "Don't show this again"
+                if (localStorage.getItem(PREF_HIDE_TOAST) !== 'true') {
+                    toast.classList.add('show');
+                }
+            }
+
+            window.hideToast = () => {
+                toast.classList.remove('show');
+            }
+
+            // Button: Disable Intro
             document.getElementById('btn-stop-anim').addEventListener('click', () => {
                 localStorage.setItem(PREF_SKIP_INTRO, 'true');
-                alert("Intro disabled. You won't see it on your next visit.");
-                skipIntro(); // Skip current one too
+                // We update the button text to confirm, then close
+                const btn = document.getElementById('btn-stop-anim');
+                btn.textContent = "Saved! Intro disabled.";
+                btn.style.background = "#22c55e"; // Green success
+                setTimeout(hideToast, 1200);
             });
 
-            // Listener: "Do not show message" checkbox
+            // Checkbox: Don't show toast
             document.getElementById('chk-no-toast').addEventListener('change', (e) => {
                 if(e.target.checked) {
                     localStorage.setItem(PREF_HIDE_TOAST, 'true');
@@ -230,17 +242,9 @@
                 }
             });
 
-            // Toast Logic
-            window.hideToast = () => toast.classList.remove('show');
 
-            // Show toast after a delay (if not disabled)
-            if (localStorage.getItem(PREF_HIDE_TOAST) !== 'true') {
-                setTimeout(() => {
-                    toast.classList.add('show');
-                }, 1500); // Appear 1.5s into the animation
-            }
-
-            // --- 2. TEXT WRAPPING LOGIC ---
+            // --- 3. ANIMATION SETUP ---
+            
             function wrapLetters(element) {
                 const processNode = (node) => {
                     if (node.nodeType === 3) { 
@@ -262,34 +266,37 @@
                 };
                 processNode(element);
             }
-
             wrapLetters(document.querySelector('.primary-msg'));
             wrapLetters(document.querySelector('.secondary-msg'));
 
-            // --- 3. ANIMATION TIMELINE ---
-            const tl = anime.timeline({ autoplay: true });
-
-            // Set Initial State
             document.querySelector('.msg-container').style.opacity = 1;
 
+            // --- 4. TIMELINE ---
+            const tl = anime.timeline({ autoplay: true });
+
             tl
+            // A. Primary Text
             .add({
                 targets: '.primary-msg .letter:not(.keyword .letter)',
                 translateY: ["1.1em", 0], translateZ: 0, opacity: [0, 1],
                 easing: "easeOutExpo", duration: 1200, delay: anime.stagger(30)
             })
+            // B. Keyword 3D Effect
             .add({
                 targets: '.keyword .letter',
                 rotateX: [90, 0], opacity: [0, 1], translateY: [50, 0],
                 color: ['#ffffff', 'transparent'],
                 easing: "easeOutBack(1.4)", duration: 1400, delay: anime.stagger(45)
             }, "-=1000")
+            // C. Secondary Text
             .add({
                 targets: '.secondary-msg .letter',
                 translateY: ["20px", 0], opacity: [0, 1],
                 easing: "easeOutQuad", duration: 1000, delay: anime.stagger(10)
             }, "-=800")
+            // D. Hold
             .add({ duration: 1800 })
+            // E. Reveal Dashboard
             .add({
                 targets: '#intro-overlay', translateY: '-100%',
                 duration: 1000, easing: 'easeInOutQuart',
@@ -304,15 +311,16 @@
                     document.body.style.overflow = 'auto';
                     landingPage.style.opacity = 1;
                     landingPage.style.transform = 'scale(1)';
-                    hideToast(); // Remove toast if still there
+                    
+                    // >> TRIGGER TOAST NOW <<
+                    showToast();
                 }
             });
 
-            // --- 4. SKIP LOGIC ---
+            // --- 5. SKIP LOGIC ---
             function skipIntro() {
                 if (tl.completed) return;
                 tl.pause();
-                hideToast();
                 anime({
                     targets: '#intro-overlay', opacity: 0, duration: 400, easing: 'linear',
                     complete: function() {
@@ -320,14 +328,13 @@
                         document.body.style.overflow = 'auto';
                         landingPage.style.opacity = 1;
                         landingPage.style.transform = 'scale(1)';
+                        
+                        // >> TRIGGER TOAST NOW (Even if skipped) <<
+                        showToast();
                     }
                 });
             }
-            
-            // Only add dblclick listener if we are actually playing
-            if(overlay.style.display !== 'none') {
-                document.body.addEventListener('dblclick', skipIntro);
-            }
+            document.body.addEventListener('dblclick', skipIntro);
         });
     </script>
 </body>
