@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perfectly Centered Intro</title>
+    <title>Intro with Preferences</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RESET & BASE STYLES --- */
+        /* --- BASE STYLES --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
         body {
             background-color: #0f172a;
             color: #ffffff;
             font-family: 'Inter', sans-serif;
-            overflow: hidden;
+            overflow: hidden; /* Locked during intro */
             height: 100vh;
             width: 100vw;
         }
 
-        /* --- LANDING PAGE (Placeholder) --- */
+        /* --- LANDING PAGE --- */
         #landing-page {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100vh;
@@ -34,7 +33,6 @@
             opacity: 0;
             transform: scale(0.95);
         }
-
         .dashboard-mockup { text-align: center; }
 
         /* --- INTRO OVERLAY --- */
@@ -48,8 +46,10 @@
             justify-content: center;
             align-items: center;
             cursor: pointer;
+            perspective: 1000px; /* For 3D text */
         }
 
+        /* Skip Hint (Bottom) */
         .skip-hint {
             position: absolute;
             bottom: 30px;
@@ -58,54 +58,93 @@
             letter-spacing: 2px;
             opacity: 0.4;
             color: #94a3b8;
-            transition: opacity 0.3s;
         }
 
-        /* Container for the single phase message */
-        .msg-container {
-            text-align: center;
-            padding: 0 20px;
-            opacity: 0; 
+        /* --- NOTIFICATION TOAST (Top Right) --- */
+        #pref-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 280px;
+            background: rgba(30, 41, 59, 0.9); /* Slate 800 with opacity */
+            backdrop-filter: blur(8px);
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 16px;
+            z-index: 1000;
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            
+            /* Animation Start State */
+            transform: translateX(120%); 
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #pref-toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
+        }
+
+        .toast-title { font-weight: 600; color: #fff; }
+        .toast-close { 
+            background: none; border: none; color: #94a3b8; 
+            cursor: pointer; font-size: 1.2rem; line-height: 0.8;
+        }
+        .toast-close:hover { color: #fff; }
+
+        .toast-actions {
+            margin-top: 12px;
             display: flex;
             flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Action Buttons/Inputs */
+        .btn-disable {
+            background: #334155;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .btn-disable:hover { background: #475569; }
+
+        .chk-label {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            width: 100%;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #cbd5e1;
+            cursor: pointer;
         }
 
-        /* PRIMARY MESSAGE (High Attention) */
-        h1 {
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            font-weight: 700;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            color: #ffffff;
-            /* Flex ensures spans don't collapse weirdly */
-            display: block; 
-            width: 100%;
-        }
+        /* --- TEXT STYLING --- */
+        .msg-container { text-align: center; padding: 0 20px; }
+        
+        h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; }
+        h2 { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; margin-top: 1rem; }
 
-        /* SECONDARY MESSAGE (Less Attentive) */
-        h2 {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            font-weight: 400;
-            color: #94a3b8;
-            letter-spacing: 0.05em;
-            margin-top: 1rem;
-        }
-
-        /* --- ANIMATION HELPERS --- */
         .word { display: inline-block; white-space: nowrap; }
-        .letter { display: inline-block; transform-origin: 50% 100%; }
+        .letter { display: inline-block; transform-origin: 50% 100%; transform-style: preserve-3d; backface-visibility: hidden; }
 
-        /* KEYWORD HIGHLIGHT */
         .keyword .letter {
-            color: transparent;
             background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
             -webkit-background-clip: text;
             background-clip: text;
-            text-shadow: 0px 0px 25px rgba(56, 189, 248, 0.4);
+            color: transparent;
             font-weight: 800;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
         }
     </style>
 </head>
@@ -114,17 +153,35 @@
     <div id="landing-page">
         <div class="dashboard-mockup">
             <h1>Dashboard Loaded</h1>
-            <p style="margin-top: 1rem; color: #64748b;">Welcome to your workspace.</p>
+            <p style="margin-top: 1rem; color: #64748b;">Settings applied based on user preference.</p>
+            <button onclick="localStorage.clear(); location.reload();" style="margin-top:20px; padding:10px; cursor:pointer;">Reset All Preferences</button>
         </div>
     </div>
 
     <div id="intro-overlay">
         <div class="msg-container">
-            <h1 class="primary-msg">Real time progress in <br /><span class="keyword">ONE DASHBOARD</span></h1>
-            
+            <h1 class="primary-msg">Real time progress in <br /><span class="keyword">one dashboard</span></h1>
             <h2 class="secondary-msg">Unleash Total Visibility Across Every Build</h2>
         </div>
         <div class="skip-hint">Double click to skip</div>
+    </div>
+
+    <div id="pref-toast">
+        <div class="toast-header">
+            <span class="toast-title">Animation Controls</span>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+        <p style="font-size: 0.8em; color: #94a3b8; margin-bottom: 10px;">
+            Tip: Double-click anywhere to skip this intro instantly.
+        </p>
+        <div class="toast-actions">
+            <button class="btn-disable" id="btn-stop-anim">
+                Never play this animation again
+            </button>
+            <label class="chk-label">
+                <input type="checkbox" id="chk-no-toast"> Do not show this message next time
+            </label>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -132,86 +189,110 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- 1. UPDATED TEXT PREPARATION (FIXED) ---
+            // --- 0. PREFERENCE CHECK (Local Storage) ---
+            const overlay = document.querySelector('#intro-overlay');
+            const landingPage = document.querySelector('#landing-page');
+            const toast = document.querySelector('#pref-toast');
+            
+            // Preference Keys
+            const PREF_SKIP_INTRO = 'pref_skip_intro';
+            const PREF_HIDE_TOAST = 'pref_hide_toast';
+
+            // Function to reveal landing page immediately (No animation)
+            const showLandingPageInstant = () => {
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                landingPage.style.opacity = 1;
+                landingPage.style.transform = 'scale(1)';
+            };
+
+            // CHECK 1: Should we skip the intro entirely?
+            if (localStorage.getItem(PREF_SKIP_INTRO) === 'true') {
+                showLandingPageInstant();
+                return; // Stop script execution here
+            }
+
+            // --- 1. SETUP UI & LISTENERS ---
+            
+            // Listener: "Never play again" button
+            document.getElementById('btn-stop-anim').addEventListener('click', () => {
+                localStorage.setItem(PREF_SKIP_INTRO, 'true');
+                alert("Intro disabled. You won't see it on your next visit.");
+                skipIntro(); // Skip current one too
+            });
+
+            // Listener: "Do not show message" checkbox
+            document.getElementById('chk-no-toast').addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    localStorage.setItem(PREF_HIDE_TOAST, 'true');
+                } else {
+                    localStorage.removeItem(PREF_HIDE_TOAST);
+                }
+            });
+
+            // Toast Logic
+            window.hideToast = () => toast.classList.remove('show');
+
+            // Show toast after a delay (if not disabled)
+            if (localStorage.getItem(PREF_HIDE_TOAST) !== 'true') {
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, 1500); // Appear 1.5s into the animation
+            }
+
+            // --- 2. TEXT WRAPPING LOGIC ---
             function wrapLetters(element) {
                 const processNode = (node) => {
-                    if (node.nodeType === 3) { // Text Node
-                        // FIX: Normalize all whitespace to single spaces and Trim edges
-                        // This prevents code indentation from becoming visible &nbsp;
+                    if (node.nodeType === 3) { 
                         let text = node.textContent.replace(/\s+/g, ' ');
-                        
-                        // If this text node is at the very start/end of a block, trim it strictly
                         if (node === element.firstChild) text = text.trimStart();
                         if (node === element.lastChild) text = text.trimEnd();
-
-                        if (!text) return; // Skip empty nodes
-
+                        if (!text) return; 
                         const frag = document.createDocumentFragment();
                         [...text].forEach(char => {
                             const span = document.createElement('span');
                             span.className = 'letter';
-                            // Ensure spaces are kept as non-breaking for layout, but only real spaces
                             span.textContent = char === ' ' ? '\u00A0' : char;
                             frag.appendChild(span);
                         });
                         node.replaceWith(frag);
-                    } else if (node.nodeType === 1) { // Element Node
-                        // Recurse, but don't touch <br>
-                        if (node.tagName !== 'BR') {
-                            Array.from(node.childNodes).forEach(processNode);
-                        }
+                    } else if (node.nodeType === 1 && node.tagName !== 'BR') {
+                        Array.from(node.childNodes).forEach(processNode);
                     }
                 };
                 processNode(element);
             }
 
-            const h1 = document.querySelector('.primary-msg');
-            const h2 = document.querySelector('.secondary-msg');
-            wrapLetters(h1);
-            wrapLetters(h2);
+            wrapLetters(document.querySelector('.primary-msg'));
+            wrapLetters(document.querySelector('.secondary-msg'));
 
-            // --- 2. ANIMATION TIMELINE ---
-            const tl = anime.timeline({
-                autoplay: true,
-                easing: 'easeOutExpo'
-            });
+            // --- 3. ANIMATION TIMELINE ---
+            const tl = anime.timeline({ autoplay: true });
 
-            const overlay = document.querySelector('#intro-overlay');
-            const landingPage = document.querySelector('#landing-page');
-
+            // Set Initial State
             document.querySelector('.msg-container').style.opacity = 1;
 
             tl
-            // PRIMARY MSG
             .add({
-                targets: '.primary-msg .letter',
-                translateY: ["1.1em", 0],
-                translateZ: 0,
-                opacity: [0, 1],
-                scale: (el) => el.parentElement.classList.contains('keyword') ? [1.8, 1] : [1, 1],
-                filter: (el) => el.parentElement.classList.contains('keyword') ? ['blur(15px)', 'blur(0px)'] : ['blur(0px)', 'blur(0px)'],
-                duration: 1200,
-                delay: anime.stagger(35)
+                targets: '.primary-msg .letter:not(.keyword .letter)',
+                translateY: ["1.1em", 0], translateZ: 0, opacity: [0, 1],
+                easing: "easeOutExpo", duration: 1200, delay: anime.stagger(30)
             })
-            // SECONDARY MSG (Less Attentive, Subtle)
+            .add({
+                targets: '.keyword .letter',
+                rotateX: [90, 0], opacity: [0, 1], translateY: [50, 0],
+                color: ['#ffffff', 'transparent'],
+                easing: "easeOutBack(1.4)", duration: 1400, delay: anime.stagger(45)
+            }, "-=1000")
             .add({
                 targets: '.secondary-msg .letter',
-                translateY: ["100%", 0],
-                opacity: [0, 1],
-                easing: "easeOutQuad",
-                duration: 750,
-                delay: anime.stagger(15)
-            }, "-=800") 
-            // HOLD
+                translateY: ["20px", 0], opacity: [0, 1],
+                easing: "easeOutQuad", duration: 1000, delay: anime.stagger(10)
+            }, "-=800")
+            .add({ duration: 1800 })
             .add({
-                duration: 750
-            })
-            // REVEAL
-            .add({
-                targets: '#intro-overlay',
-                translateY: '-100%',
-                duration: 1000,
-                easing: 'easeInOutQuart',
+                targets: '#intro-overlay', translateY: '-100%',
+                duration: 1000, easing: 'easeInOutQuart',
                 update: function(anim) {
                     if(anim.progress > 10) {
                         landingPage.style.opacity = (anim.progress - 10) / 90;
@@ -223,18 +304,17 @@
                     document.body.style.overflow = 'auto';
                     landingPage.style.opacity = 1;
                     landingPage.style.transform = 'scale(1)';
+                    hideToast(); // Remove toast if still there
                 }
             });
 
-            // SKIP LOGIC
+            // --- 4. SKIP LOGIC ---
             function skipIntro() {
                 if (tl.completed) return;
                 tl.pause();
+                hideToast();
                 anime({
-                    targets: '#intro-overlay',
-                    opacity: 0,
-                    duration: 400,
-                    easing: 'linear',
+                    targets: '#intro-overlay', opacity: 0, duration: 400, easing: 'linear',
                     complete: function() {
                         overlay.style.display = 'none';
                         document.body.style.overflow = 'auto';
@@ -243,7 +323,11 @@
                     }
                 });
             }
-            document.body.addEventListener('dblclick', skipIntro);
+            
+            // Only add dblclick listener if we are actually playing
+            if(overlay.style.display !== 'none') {
+                document.body.addEventListener('dblclick', skipIntro);
+            }
         });
     </script>
 </body>
