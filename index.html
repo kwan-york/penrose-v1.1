@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Penrose - AI-Powered Construction Scheduling</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" href="./img/Logo square.png">
-</head>
-<body>
-    <!-- logo link to home page url -->
-    <header id="main-header"></header>
+  </head>
+  <body>
+
+
 <style>
         /* --- 1. LAYER 0: White Background --- */
         body, html {
@@ -196,10 +196,149 @@
             text-shadow: 0px 0px 20px rgba(56, 189, 248, 0.3); /* Subtle glow */
             font-weight: 800; /* Extra bold */
         }
+        /* --- BASE STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden; 
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- LANDING PAGE / DASHBOARD --- */
+        #landing-page {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            background: #f8fafc; 
+            color: #334155;
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .dashboard-mockup { text-align: center; }
+
+        /* --- INTRO OVERLAY --- */
+        #intro-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #0f172a;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            perspective: 1000px; 
+        }
+
+        .skip-hint {
+            position: absolute;
+            bottom: 30px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.4;
+            color: #94a3b8;
+        }
+
+        /* --- PERSISTENT NOTIFICATION (Top Right) --- */
+        /* Note: z-index is 50 to sit above dashboard but below intro overlay (if overlay was active) */
+        #pref-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            background: #ffffff; /* White background for dashboard contrast */
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 50; 
+            font-size: 0.85rem;
+            color: #475569;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            
+            /* Hidden State */
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #pref-toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .toast-title { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
+        .toast-close { 
+            background: none; border: none; color: #94a3b8; 
+            cursor: pointer; font-size: 1.4rem; line-height: 0.6;
+        }
+        .toast-close:hover { color: #334155; }
+
+        .toast-actions {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 15px;
+        }
+
+        .btn-disable {
+            background: #0f172a;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .btn-disable:hover { background: #334155; }
+
+        .chk-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        /* --- TEXT STYLING --- */
+        .msg-container { text-align: center; padding: 0 20px; }
+        h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; display:block; width:100%; }
+        h2 { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; margin-top: 1rem; }
+        .word { display: inline-block; white-space: nowrap; }
+        .letter { display: inline-block; transform-origin: 50% 100%; transform-style: preserve-3d; backface-visibility: hidden; }
+        .keyword .letter {
+            background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 800;
+            filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
+        }
 
     </style>
 <body>
-
+    <!-- logo link to home page url -->
+  <header id="main-header"></header>
+  <div id="content-in-index">
     <div class="fixed-background"></div>
 
     <div class="card-deck">
@@ -223,6 +362,33 @@
             <h2>Card 4</h2>
             <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
         </div>
+    </div>
+    </div>
+
+    <div id="pref-toast">
+        <div class="toast-header">
+            <span class="toast-title">Intro Settings</span>
+            <button class="toast-close" onclick="hideToast()">&times;</button>
+        </div>
+        <p style="font-size: 0.8rem; line-height: 1.5;">
+            Did you know? You can <strong>Double Click</strong> during the intro to skip it instantly.
+        </p>
+        <div class="toast-actions">
+            <button class="btn-disable" id="btn-stop-anim">
+                Disable intro on next visit
+            </button>
+            <label class="chk-label">
+                <input type="checkbox" id="chk-no-toast"> Don't show this tip again
+            </label>
+        </div>
+    </div>
+
+    <div id="intro-overlay">
+        <div class="msg-container">
+            <h1 class="primary-msg">Real time progress in <br /><span class="keyword">one dashboard</span></h1>
+            <h2 class="secondary-msg">Unleash Total Visibility Across Every Build</h2>
+        </div>
+        <div class="skip-hint">Double click to skip</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
@@ -435,6 +601,154 @@
                 });
             }
 
+            document.body.addEventListener('dblclick', skipIntro);
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- CONSTANTS & DOM ---
+            const overlay = document.querySelector('#intro-overlay');
+            const landingPage = document.querySelector('#content-in-index');
+            const toast = document.querySelector('#pref-toast');
+            
+            const PREF_SKIP_INTRO = 'pref_skip_intro';
+            const PREF_HIDE_TOAST = 'pref_hide_toast';
+
+            // --- 1. INITIALIZATION CHECK ---
+            
+            // If user previously clicked "Disable intro"
+            if (localStorage.getItem(PREF_SKIP_INTRO) === 'true') {
+                overlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                landingPage.style.opacity = 1;
+                landingPage.style.transform = 'scale(1)';
+                return; // Exit script, no animation, no toast
+            }
+
+            // --- 2. TOAST LOGIC ---
+
+            function showToast() {
+                // Only show if user hasn't ticked "Don't show this again"
+                if (localStorage.getItem(PREF_HIDE_TOAST) !== 'true') {
+                    toast.classList.add('show');
+                }
+            }
+
+            window.hideToast = () => {
+                toast.classList.remove('show');
+            }
+
+            // Button: Disable Intro
+            document.getElementById('btn-stop-anim').addEventListener('click', () => {
+                localStorage.setItem(PREF_SKIP_INTRO, 'true');
+                // We update the button text to confirm, then close
+                const btn = document.getElementById('btn-stop-anim');
+                btn.textContent = "Saved! Intro disabled.";
+                btn.style.background = "#22c55e"; // Green success
+                setTimeout(hideToast, 1200);
+            });
+
+            // Checkbox: Don't show toast
+            document.getElementById('chk-no-toast').addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    localStorage.setItem(PREF_HIDE_TOAST, 'true');
+                } else {
+                    localStorage.removeItem(PREF_HIDE_TOAST);
+                }
+            });
+
+
+            // --- 3. ANIMATION SETUP ---
+            
+            function wrapLetters(element) {
+                const processNode = (node) => {
+                    if (node.nodeType === 3) { 
+                        let text = node.textContent.replace(/\s+/g, ' ');
+                        if (node === element.firstChild) text = text.trimStart();
+                        if (node === element.lastChild) text = text.trimEnd();
+                        if (!text) return; 
+                        const frag = document.createDocumentFragment();
+                        [...text].forEach(char => {
+                            const span = document.createElement('span');
+                            span.className = 'letter';
+                            span.textContent = char === ' ' ? '\u00A0' : char;
+                            frag.appendChild(span);
+                        });
+                        node.replaceWith(frag);
+                    } else if (node.nodeType === 1 && node.tagName !== 'BR') {
+                        Array.from(node.childNodes).forEach(processNode);
+                    }
+                };
+                processNode(element);
+            }
+            wrapLetters(document.querySelector('.primary-msg'));
+            wrapLetters(document.querySelector('.secondary-msg'));
+
+            document.querySelector('.msg-container').style.opacity = 1;
+
+            // --- 4. TIMELINE ---
+            const tl = anime.timeline({ autoplay: true });
+
+            tl
+            // A. Primary Text
+            .add({
+                targets: '.primary-msg .letter:not(.keyword .letter)',
+                translateY: ["1.1em", 0], translateZ: 0, opacity: [0, 1],
+                easing: "easeOutExpo", duration: 1200, delay: anime.stagger(30)
+            })
+            // B. Keyword 3D Effect
+            .add({
+                targets: '.keyword .letter',
+                rotateX: [90, 0], opacity: [0, 1], translateY: [50, 0],
+                color: ['#ffffff', 'transparent'],
+                easing: "easeOutBack(1.4)", duration: 1400, delay: anime.stagger(45)
+            }, "-=1000")
+            // C. Secondary Text
+            .add({
+                targets: '.secondary-msg .letter',
+                translateY: ["20px", 0], opacity: [0, 1],
+                easing: "easeOutQuad", duration: 1000, delay: anime.stagger(10)
+            }, "-=800")
+            // D. Hold
+            .add({ duration: 1800 })
+            // E. Reveal Dashboard
+            .add({
+                targets: '#intro-overlay', translateY: '-100%',
+                duration: 1000, easing: 'easeInOutQuart',
+                update: function(anim) {
+                    if(anim.progress > 10) {
+                        landingPage.style.opacity = (anim.progress - 10) / 90;
+                        landingPage.style.transform = `scale(${0.95 + (0.05 * (anim.progress/100))})`;
+                    }
+                },
+                complete: function() {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                    landingPage.style.opacity = 1;
+                    landingPage.style.transform = 'scale(1)';
+                    
+                    // >> TRIGGER TOAST NOW <<
+                    showToast();
+                }
+            });
+
+            // --- 5. SKIP LOGIC ---
+            function skipIntro() {
+                if (tl.completed) return;
+                tl.pause();
+                anime({
+                    targets: '#intro-overlay', opacity: 0, duration: 400, easing: 'linear',
+                    complete: function() {
+                        overlay.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                        landingPage.style.opacity = 1;
+                        landingPage.style.transform = 'scale(1)';
+                        
+                        // >> TRIGGER TOAST NOW (Even if skipped) <<
+                        showToast();
+                    }
+                });
+            }
             document.body.addEventListener('dblclick', skipIntro);
         });
     </script>
