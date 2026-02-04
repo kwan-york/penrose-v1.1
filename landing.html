@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard with Persistent Settings</title>
+    <title>Dashboard Intro with Countdown</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
             width: 100vw;
         }
 
-        /* --- LANDING PAGE / DASHBOARD --- */
+        /* --- LANDING PAGE --- */
         #landing-page {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100vh;
@@ -59,14 +59,13 @@
             color: #94a3b8;
         }
 
-        /* --- PERSISTENT NOTIFICATION (Top Right) --- */
-        /* Note: z-index is 50 to sit above dashboard but below intro overlay (if overlay was active) */
+        /* --- PERSISTENT NOTIFICATION --- */
         #pref-toast {
             position: fixed;
             top: 20px;
             right: 20px;
             width: 300px;
-            background: #ffffff; /* White background for dashboard contrast */
+            background: #ffffff;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 20px;
@@ -74,8 +73,6 @@
             font-size: 0.85rem;
             color: #475569;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            
-            /* Hidden State */
             transform: translateX(120%);
             opacity: 0;
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -94,10 +91,7 @@
         }
 
         .toast-title { font-weight: 700; color: #1e293b; font-size: 0.95rem; }
-        .toast-close { 
-            background: none; border: none; color: #94a3b8; 
-            cursor: pointer; font-size: 1.4rem; line-height: 0.6;
-        }
+        .toast-close { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 1.4rem; line-height: 0.6; }
         .toast-close:hover { color: #334155; }
 
         .toast-actions {
@@ -110,35 +104,22 @@
         }
 
         .btn-disable {
-            background: #0f172a;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: background 0.2s;
-            text-align: center;
+            background: #0f172a; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: background 0.2s; text-align: center;
         }
         .btn-disable:hover { background: #334155; }
-
-        .chk-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: #64748b;
-            cursor: pointer;
-        }
+        .chk-label { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; color: #64748b; cursor: pointer; }
 
         /* --- TEXT STYLING --- */
         .msg-container { text-align: center; padding: 0 20px; }
         h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 1.5rem; display:block; width:100%; }
         h2 { font-size: clamp(1rem, 2vw, 1.25rem); font-weight: 400; color: #94a3b8; letter-spacing: 0.05em; margin-top: 1rem; }
+
         .word { display: inline-block; white-space: nowrap; }
         .letter { display: inline-block; transform-origin: 50% 100%; transform-style: preserve-3d; backface-visibility: hidden; }
-        .keyword .letter {
+
+        /* KEYWORD & COUNTER STYLING */
+        /* Common Gradient for keyword parts */
+        .keyword-gradient {
             background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
             -webkit-background-clip: text;
             background-clip: text;
@@ -146,6 +127,21 @@
             font-weight: 800;
             filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.2));
         }
+
+        /* The Dashboard text (.letter spans) */
+        .keyword .letter {
+            /* Inherits gradient via JS logic or explicit class */
+        }
+
+        /* The Number Counter */
+        #counter-span {
+            display: inline-block;
+            width: 1.3em; /* Fixed width to prevent jittering as numbers change */
+            text-align: right;
+            margin-right: 0.1em;
+            vertical-align: bottom; /* Align with text baseline */
+        }
+
     </style>
 </head>
 <body>
@@ -180,7 +176,12 @@
 
     <div id="intro-overlay">
         <div class="msg-container">
-            <h1 class="primary-msg">Real time progress in <br /><span class="keyword">one dashboard</span></h1>
+            <h1 class="primary-msg">
+                Real time progress in <br />
+                <span class="keyword">
+                    <span id="counter-span" class="keyword-gradient">1</span><span id="dashboard-text" class="keyword-gradient"> dashboard</span>
+                </span>
+            </h1>
             <h2 class="secondary-msg">Unleash Total Visibility Across Every Build</h2>
         </div>
         <div class="skip-hint">Double click to skip</div>
@@ -191,62 +192,51 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- CONSTANTS & DOM ---
+            // --- CONSTANTS ---
             const overlay = document.querySelector('#intro-overlay');
             const landingPage = document.querySelector('#landing-page');
             const toast = document.querySelector('#pref-toast');
+            const counterSpan = document.getElementById('counter-span');
             
             const PREF_SKIP_INTRO = 'pref_skip_intro';
             const PREF_HIDE_TOAST = 'pref_hide_toast';
 
             // --- 1. INITIALIZATION CHECK ---
-            
-            // If user previously clicked "Disable intro"
             if (localStorage.getItem(PREF_SKIP_INTRO) === 'true') {
                 overlay.style.display = 'none';
                 document.body.style.overflow = 'auto';
                 landingPage.style.opacity = 1;
                 landingPage.style.transform = 'scale(1)';
-                return; // Exit script, no animation, no toast
+                return;
             }
 
             // --- 2. TOAST LOGIC ---
-
             function showToast() {
-                // Only show if user hasn't ticked "Don't show this again"
                 if (localStorage.getItem(PREF_HIDE_TOAST) !== 'true') {
                     toast.classList.add('show');
                 }
             }
-
-            window.hideToast = () => {
-                toast.classList.remove('show');
-            }
-
-            // Button: Disable Intro
+            window.hideToast = () => toast.classList.remove('show');
+            
             document.getElementById('btn-stop-anim').addEventListener('click', () => {
                 localStorage.setItem(PREF_SKIP_INTRO, 'true');
-                // We update the button text to confirm, then close
                 const btn = document.getElementById('btn-stop-anim');
                 btn.textContent = "Saved! Intro disabled.";
-                btn.style.background = "#22c55e"; // Green success
+                btn.style.background = "#22c55e";
                 setTimeout(hideToast, 1200);
             });
 
-            // Checkbox: Don't show toast
             document.getElementById('chk-no-toast').addEventListener('change', (e) => {
-                if(e.target.checked) {
-                    localStorage.setItem(PREF_HIDE_TOAST, 'true');
-                } else {
-                    localStorage.removeItem(PREF_HIDE_TOAST);
-                }
+                if(e.target.checked) localStorage.setItem(PREF_HIDE_TOAST, 'true');
+                else localStorage.removeItem(PREF_HIDE_TOAST);
             });
 
-
-            // --- 3. ANIMATION SETUP ---
-            
+            // --- 3. TEXT WRAPPING & PREP ---
             function wrapLetters(element) {
                 const processNode = (node) => {
+                    // Skip the counter span entirely so we don't break the number logic
+                    if (node.id === 'counter-span') return;
+
                     if (node.nodeType === 3) { 
                         let text = node.textContent.replace(/\s+/g, ' ');
                         if (node === element.firstChild) text = text.trimStart();
@@ -256,6 +246,10 @@
                         [...text].forEach(char => {
                             const span = document.createElement('span');
                             span.className = 'letter';
+                            // Apply keyword class to inner letters if parent has it
+                            if(element.classList.contains('keyword-gradient')) {
+                                span.classList.add('keyword-gradient');
+                            }
                             span.textContent = char === ' ' ? '\u00A0' : char;
                             frag.appendChild(span);
                         });
@@ -266,37 +260,64 @@
                 };
                 processNode(element);
             }
+
+            // Wrap primary parts (excluding the counter ID)
             wrapLetters(document.querySelector('.primary-msg'));
             wrapLetters(document.querySelector('.secondary-msg'));
+            // Specifically wrap "dashboard" text which is in a separate span now
+            wrapLetters(document.getElementById('dashboard-text'));
 
             document.querySelector('.msg-container').style.opacity = 1;
 
-            // --- 4. TIMELINE ---
+            // --- 4. ANIMATION TIMELINE ---
             const tl = anime.timeline({ autoplay: true });
 
+            // Create a proxy object to hold the number value for animation
+            var counterObj = { val: 99 };
+
             tl
-            // A. Primary Text
+            // A. "Real time progress in"
             .add({
-                targets: '.primary-msg .letter:not(.keyword .letter)',
+                targets: '.primary-msg > .letter', // Direct children letters only (exclude keyword container logic)
                 translateY: ["1.1em", 0], translateZ: 0, opacity: [0, 1],
                 easing: "easeOutExpo", duration: 1200, delay: anime.stagger(30)
             })
-            // B. Keyword 3D Effect
+            
+            // B. "1 dashboard" ENTRANCE + COUNTDOWN
+            // We start this 1000ms before previous ends
             .add({
-                targets: '.keyword .letter',
-                rotateX: [90, 0], opacity: [0, 1], translateY: [50, 0],
-                color: ['#ffffff', 'transparent'],
-                easing: "easeOutBack(1.4)", duration: 1400, delay: anime.stagger(45)
+                targets: ['#dashboard-text .letter', '#counter-span'],
+                translateY: ["100%", 0],
+                opacity: [0, 1],
+                easing: "easeOutExpo", // Matches text slide
+                duration: 1200,
+                delay: anime.stagger(30) // Stagger letters
             }, "-=1000")
-            // C. Secondary Text
+
+            // C. THE COUNTDOWN (Run in parallel with entrance)
+            // Starts same time as Step B (using timeline offset)
+            .add({
+                targets: counterObj,
+                val: [99, 1], // From 99 to 1
+                round: 1, // Integers only
+                easing: 'easeOutExpo', // Exponential Decay (Fast start, slow end)
+                duration: 2000, // 2 Seconds total
+                update: function() {
+                    counterSpan.innerHTML = counterObj.val;
+                }
+            }, "-=1200") // Sync with the entrance above
+
+            // D. Secondary Text
             .add({
                 targets: '.secondary-msg .letter',
                 translateY: ["20px", 0], opacity: [0, 1],
                 easing: "easeOutQuad", duration: 1000, delay: anime.stagger(10)
-            }, "-=800")
-            // D. Hold
-            .add({ duration: 1800 })
-            // E. Reveal Dashboard
+            }, "-=1500") // Overlap significantly
+            
+            // E. Hold
+            .add({ duration: 1000 })
+            
+            // F. Reveal
             .add({
                 targets: '#intro-overlay', translateY: '-100%',
                 duration: 1000, easing: 'easeInOutQuart',
@@ -311,8 +332,6 @@
                     document.body.style.overflow = 'auto';
                     landingPage.style.opacity = 1;
                     landingPage.style.transform = 'scale(1)';
-                    
-                    // >> TRIGGER TOAST NOW <<
                     showToast();
                 }
             });
@@ -328,8 +347,6 @@
                         document.body.style.overflow = 'auto';
                         landingPage.style.opacity = 1;
                         landingPage.style.transform = 'scale(1)';
-                        
-                        // >> TRIGGER TOAST NOW (Even if skipped) <<
                         showToast();
                     }
                 });
