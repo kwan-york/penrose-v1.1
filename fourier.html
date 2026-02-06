@@ -78,7 +78,7 @@
         .logo-container {
             position: absolute;
             z-index: 20;
-            /* 1.5x size (was 100px -> now 150px) */
+            /* 1.5x size */
             width: 150px;
             height: 150px;
             background: rgba(16, 16, 24, 0.6);
@@ -109,7 +109,7 @@
         /* LABELS */
         .labels-container {
             position: absolute;
-            top: 20px; /* Position relative to the stage top */
+            top: 20px;
             width: 100%;
             display: flex;
             justify-content: space-between;
@@ -175,7 +175,7 @@
         const ctx = canvas.getContext('2d');
         
         let width, height, centerY, centerX;
-        const logoRadius = 75; // 150px diameter / 2
+        const logoRadius = 75; 
         
         // Colors
         const colorChaos = '#ff3b3b';
@@ -184,8 +184,8 @@
         // Animation State Management
         const state = {
             phase: 'intro', // intro -> injecting -> processing -> ejecting -> flowing
-            leftProgress: 0, // 0 to 1 (distance from left edge to logo)
-            rightProgress: 0, // 0 to 1 (distance from logo to right edge)
+            leftProgress: 0, // 0 to 1
+            rightProgress: 0, // 0 to 1
             time: 0
         };
 
@@ -201,7 +201,6 @@
         /** --- WAVE FUNCTIONS --- */
 
         function getChaoticWave(x, t) {
-            // Complex sum of sines
             const f = 0.008; 
             return (
                 Math.sin(x * f + t) * 40 + 
@@ -210,7 +209,6 @@
             );
         }
 
-        // Returns just the Y value for a simple sine
         function getSimpleSine(x, t, freqMult, speedMult) {
             const f = 0.01;
             return Math.sin(x * f * freqMult + t * speedMult) * 30;
@@ -219,23 +217,27 @@
         /** --- DRAWING LOGIC --- */
 
         function draw() {
-            // Clear screen
             ctx.clearRect(0, 0, width, height);
             
             // 1. Draw Left Wave (Input)
-            // We animate the "limit" of the line based on leftProgress
+            // It travels from Left Edge (0) to Logo Surface (centerX - logoRadius)
             if (state.phase !== 'intro') {
                 const startX = 0;
-                const endX = (centerX - logoRadius - 10); // Stop at logo surface
-                const currentLimit = startX + (endX - startX) * state.leftProgress;
+                const endX = centerX - logoRadius;
+                
+                // Calculate current leading edge of the wave
+                const currentHeadX = startX + (endX - startX) * state.leftProgress;
 
                 ctx.beginPath();
                 ctx.strokeStyle = colorChaos;
                 ctx.lineWidth = 3;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = colorChaos;
+                // Ensure opacity is full
+                ctx.globalAlpha = 1;
 
-                for (let x = startX; x <= currentLimit; x += 3) {
+                // We only draw up to 'currentHeadX'
+                for (let x = startX; x <= currentHeadX; x += 3) {
                     const y = centerY + getChaoticWave(x, state.time);
                     if (x === startX) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
@@ -245,26 +247,26 @@
 
             // 2. Draw Right Waves (Radiation Output)
             if (state.rightProgress > 0) {
-                // Radiation Angles: -10deg, 0deg, +10deg
-                const angles = [-10 * (Math.PI/180), 0, 10 * (Math.PI/180)];
-                const speeds = [1.2, 1.0, 0.8]; // Different speeds for variety
-                const freqs = [1.5, 1.0, 2.0];  // Different frequencies
+                // Radiation Angles: -20deg, 0deg, +20deg (Increased angle)
+                const angles = [-20 * (Math.PI/180), 0, 20 * (Math.PI/180)];
+                const speeds = [1.2, 1.0, 0.8]; 
+                const freqs = [1.5, 1.0, 2.0];  
 
-                // The starting point for all output waves (Right surface of logo)
+                // Origin is the RIGHT surface of the logo
                 const originX = centerX + logoRadius; 
                 const originY = centerY;
                 
-                // Determine how far the wave has traveled
-                // Calculate max distance to corner of screen to ensure it fills
+                // Max draw distance (needs to clear screen corner)
                 const maxDist = width; 
-                const currentDist = maxDist * state.rightProgress;
+                
+                // The wave length grows based on rightProgress
+                const currentWaveLength = maxDist * state.rightProgress;
 
                 angles.forEach((angle, i) => {
                     ctx.save();
                     
-                    // Move coordinate system to the right edge of the logo
+                    // Transform coordinates to rotate from the logo surface
                     ctx.translate(originX, originY);
-                    // Rotate the entire coordinate system
                     ctx.rotate(angle);
 
                     ctx.beginPath();
@@ -272,38 +274,30 @@
                     ctx.lineWidth = 2;
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = colorsOrder[i];
+                    ctx.globalAlpha = 1; // Explicitly set full opacity
 
-                    // Draw line along the new LOCAL x-axis
-                    // From x=0 (logo surface) to currentDist
-                    for (let x = 0; x <= currentDist; x += 3) {
-                        // We use (x + originX) for the wave calc to keep continuity 
-                        // with the global time/space, but draw on local X
+                    // Draw line along local X-axis from 0 to currentWaveLength
+                    for (let x = 0; x <= currentWaveLength; x += 3) {
+                        // We use (x + originX) for math to keep continuity 
                         const y = getSimpleSine(x + originX, state.time, freqs[i], speeds[i]);
                         
-                        // Fade out the tip of the wave as it grows
-                        if (x > currentDist - 50 && state.phase === 'ejecting') {
-                            ctx.globalAlpha = 1 - (x - (currentDist - 50)) / 50;
-                        }
-
                         if (x === 0) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
                     ctx.stroke();
-                    ctx.restore(); // Restore coordinate system for next wave
+                    ctx.restore();
                 });
             }
 
-            // Increment Time (Wave movement speed)
             state.time -= 0.02;
             requestAnimationFrame(draw);
         }
 
-        /** --- SEQUENCER --- */
-        // This handles the timing logic (Entrance -> Travel -> Delay -> Output)
+        /** --- ANIMATION SEQUENCER --- */
 
         function startSequence() {
             
-            // Step 1: UI Entrance (Text & Logo)
+            // 1. Entrance (Text & Logo)
             const tl = anime.timeline({ easing: 'easeOutExpo' });
             
             tl.add({
@@ -320,79 +314,78 @@
                 duration: 1200,
                 easing: 'easeOutElastic(1, .5)',
                 complete: () => {
-                    // Start Signal Travel
                     state.phase = 'injecting';
-                    runSignalTravel();
+                    startSignalInjection();
                 }
             }, '-=500');
 
-            // Logo Breathing (Continuous)
+            // 2. Continuous "Breathing" (Subtle idling animation)
             anime({
                 targets: '.logo-container',
-                boxShadow: ['0 0 10px rgba(0, 242, 255, 0.1)', '0 0 50px rgba(0, 242, 255, 0.3)'],
-                borderColor: ['rgba(255, 255, 255, 0.15)', 'rgba(0, 242, 255, 0.6)'],
-                duration: 2500,
+                borderColor: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.3)'],
+                duration: 3000,
                 direction: 'alternate',
                 loop: true,
                 easing: 'easeInOutSine'
             });
         }
 
-        function runSignalTravel() {
-            // Animate Left Signal travelling to center
+        function startSignalInjection() {
+            // Animate Left Signal touching the logo
             anime({
                 targets: state,
-                leftProgress: [0, 1],
-                duration: 2500, // Takes 2.5s to reach logo
+                leftProgress: [0, 1], // Goes from 0% to 100% of the path
+                duration: 2000,
                 easing: 'linear',
                 begin: () => {
-                    // Fade in Left Label
                     anime({ targets: '.label-box.left', opacity: [0,1], translateY: [20,0], duration: 800 });
                 },
                 complete: () => {
                     state.phase = 'processing';
-                    runProcessingDelay();
+                    startProcessing();
                 }
             });
         }
 
-        function runProcessingDelay() {
-            // Simulate App "Thinking"
-            // Pulse the logo fast during processing
+        function startProcessing() {
+            // 3. The "Processing" Pulse (Stronger pumping action)
+            // This loop runs continuously now to simulate ongoing analysis
             anime({
                 targets: '.logo-container',
-                scale: [1, 1.1],
-                duration: 300,
+                scale: [1, 1.15],
+                boxShadow: ['0 0 10px rgba(0, 242, 255, 0.1)', '0 0 60px rgba(0, 242, 255, 0.5)'],
+                borderColor: ['rgba(255, 255, 255, 0.3)', 'rgba(0, 242, 255, 0.8)'],
+                duration: 600,
                 direction: 'alternate',
-                loop: 4, // 2 pulses
-                easing: 'easeInOutSine',
-                complete: () => {
-                    state.phase = 'ejecting';
-                    runOutputEjection();
-                }
+                loop: true, // Keep pumping forever
+                easing: 'easeInOutSine'
             });
+
+            // Delay before outputting results (Simulate calculation time)
+            setTimeout(() => {
+                state.phase = 'ejecting';
+                startOutputEjection();
+            }, 1000); // 1 second processing time
         }
 
-        function runOutputEjection() {
-            // Animate Right Signal shooting out
+        function startOutputEjection() {
+            // Animate Right Signals shooting out
             anime({
                 targets: state,
-                rightProgress: [0, 1],
+                rightProgress: [0, 1], // Grow wave from 0 length to max length
                 duration: 2000,
-                easing: 'easeOutCubic',
+                easing: 'easeOutCubic', 
                 begin: () => {
-                    // Fade in Right Label
                     anime({ targets: '.label-box.right', opacity: [0,1], translateY: [20,0], duration: 800 });
                 },
                 complete: () => {
-                    state.phase = 'flowing'; // Animation runs indefinitely now
+                    state.phase = 'flowing';
                 }
             });
         }
 
-        // Start everything
-        draw(); // Start render loop
-        startSequence(); // Start animation logic
+        draw(); // Start Render Loop
+        startSequence(); // Start Logic Loop
 
     </script>
 </body>
