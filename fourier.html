@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Project Intelligence Platform</title>
+    <title>Intelligent Analysis Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <style>
         :root {
             --bg-color: #08080c;
             --text-main: #ffffff;
             --text-muted: #8b9bb4;
-            --accent-chaos: #ff3b3b;   /* Red for risks */
-            --accent-order: #00f2ff;   /* Cyan for clarity */
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --accent-chaos: #ff3b3b;
+            --accent-order: #00f2ff;
+            --glass-border: rgba(255, 255, 255, 0.15);
         }
 
         body {
@@ -20,55 +20,49 @@
             padding: 0;
             background-color: var(--bg-color);
             color: var(--text-main);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Inter', sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
         }
 
-        /* --- HERO SECTION (TEXT) --- */
+        /* HERO TEXT */
         .hero-container {
             position: absolute;
             top: 15%;
-            left: 0;
             width: 100%;
             text-align: center;
             z-index: 10;
-            padding: 0 20px;
-            box-sizing: border-box;
         }
 
         .main-headline {
-            font-size: 3.5rem;
+            font-size: 3rem;
             font-weight: 800;
-            letter-spacing: -1px;
-            line-height: 1.1;
             margin-bottom: 20px;
-            opacity: 0; /* Animated in */
             background: linear-gradient(180deg, #fff 0%, #a5b4fc 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            opacity: 0;
         }
 
         .sub-headline {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--text-muted);
             max-width: 600px;
             margin: 0 auto;
             line-height: 1.6;
-            opacity: 0; /* Animated in */
+            opacity: 0;
         }
 
-        /* --- VISUALIZER STAGE --- */
+        /* CANVAS & STAGE */
         .stage {
             position: absolute;
             bottom: 0;
-            left: 0;
             width: 100%;
-            height: 50%; /* Occupies bottom half */
+            height: 55%;
             display: flex;
-            align-items: center; /* This aligns logo vertically in the container */
             justify-content: center;
+            align-items: center;
         }
 
         canvas {
@@ -80,79 +74,68 @@
             z-index: 1;
         }
 
-        /* --- LOGO --- */
+        /* CENTER LOGO */
         .logo-container {
             position: absolute;
             z-index: 20;
-            width: 100px;
-            height: 100px;
-            background: rgba(16, 16, 24, 0.8);
-            border: 1px solid var(--glass-border);
+            /* 1.5x size (was 100px -> now 150px) */
+            width: 150px;
+            height: 150px;
+            background: rgba(16, 16, 24, 0.6);
+            border: 2px solid var(--glass-border);
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            /* Note: Top position is handled by flexbox in .stage, 
-               but we can fine tune with transform if needed */
-            backdrop-filter: blur(10px);
-            opacity: 0; /* Animated in */
-            box-shadow: 0 0 0 rgba(0, 242, 255, 0); 
+            backdrop-filter: blur(12px);
+            opacity: 0; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        .logo-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
         }
 
         .logo-text {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: 800;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             color: var(--accent-order);
             text-transform: uppercase;
         }
 
-        /* --- LABELS (FLOATING) --- */
+        /* LABELS */
         .labels-container {
             position: absolute;
-            bottom: 30%; /* Aligned roughly above the waves */
+            top: 20px; /* Position relative to the stage top */
             width: 100%;
             display: flex;
             justify-content: space-between;
-            padding: 0 10%;
+            padding: 0 5%;
             box-sizing: border-box;
             pointer-events: none;
             z-index: 5;
         }
 
-        .label-box {
-            opacity: 0;
-            transform: translateY(20px);
-        }
+        .label-box { opacity: 0; }
+        .label-box.left { text-align: right; margin-right: 100px; }
+        .label-box.right { text-align: left; margin-left: 100px; }
+        
+        .label-title { font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
+        .label-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .text-chaos { color: var(--accent-chaos); }
+        .text-order { color: var(--accent-order); }
 
-        .label-box.left { text-align: right; margin-right: 60px; }
-        .label-box.right { text-align: left; margin-left: 60px; }
-
-        .label-title {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .label-desc {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-        }
-
-        .text-chaos { color: var(--accent-chaos); text-shadow: 0 0 10px rgba(255, 59, 59, 0.4); }
-        .text-order { color: var(--accent-order); text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
-
-        /* --- GRADIENT FADE --- */
         .vignette {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, transparent 60%, var(--bg-color) 100%);
+            background: radial-gradient(circle, transparent 50%, var(--bg-color) 100%);
             pointer-events: none;
             z-index: 2;
         }
-        
+
     </style>
 </head>
 <body>
@@ -160,9 +143,8 @@
     <div class="hero-container">
         <h1 class="main-headline">Turn Complexity into Clarity.</h1>
         <p class="sub-headline">
-            Don't let hidden risks derail your progress. 
-            We analyze the noise of complex projects to give you total visibility 
-            on delays, risks, and performance.
+            From raw, chaotic signals to clear actionable intelligence. 
+            We process the noise so you can focus on the performance.
         </p>
     </div>
 
@@ -170,17 +152,18 @@
         <canvas id="waveCanvas"></canvas>
         
         <div class="logo-container" id="appLogo">
-            <span class="logo-text">AI<br>CORE</span>
+            <div class="logo-icon">💠</div>
+            <span class="logo-text">CORE</span>
         </div>
 
         <div class="labels-container">
             <div class="label-box left">
-                <div class="label-title text-chaos">Project Complexity</div>
-                <div class="label-desc">Unseen Delays • Hidden Risks • Noise</div>
+                <div class="label-title text-chaos">Raw Signal</div>
+                <div class="label-desc">Complex • Noisy • High Risk</div>
             </div>
             <div class="label-box right">
-                <div class="label-title text-order">Total Visibility</div>
-                <div class="label-desc">Performance Metrics • Clear Insights</div>
+                <div class="label-title text-order">Analyzed Data</div>
+                <div class="label-desc">Structured • Clear • Optimized</div>
             </div>
         </div>
     </div>
@@ -188,36 +171,38 @@
     <div class="vignette"></div>
 
     <script>
-        /** * CANVAS SETUP 
-         */
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         
-        let width, height, centerY;
-
-        // Configuration
-        // Note: Speed is significantly reduced here (0.015)
-        let time = 0; 
-        const speed = 0.05; 
-        const colorChaos = '#ff3b3b'; 
+        let width, height, centerY, centerX;
+        const logoRadius = 75; // 150px diameter / 2
+        
+        // Colors
+        const colorChaos = '#ff3b3b';
         const colorsOrder = ['#00f2ff', '#4facfe', '#7000ff'];
+
+        // Animation State Management
+        const state = {
+            phase: 'intro', // intro -> injecting -> processing -> ejecting -> flowing
+            leftProgress: 0, // 0 to 1 (distance from left edge to logo)
+            rightProgress: 0, // 0 to 1 (distance from logo to right edge)
+            time: 0
+        };
 
         function resize() {
             width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight * 0.5; // Canvas is bottom 50%
-            // The wave center is in the middle of the canvas (which is the bottom quarter of screen)
-            centerY = height / 2; 
+            height = canvas.height = window.innerHeight * 0.55; 
+            centerY = height / 2;
+            centerX = width / 2;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        /** * WAVE MATH 
-         */
-        
-        // Left Side: Noisy, jagged, unpredictable
+        /** --- WAVE FUNCTIONS --- */
+
         function getChaoticWave(x, t) {
-            const f = 0.008; // Lower frequency for smoother look at slow speeds
-            // Sum of sines to create "noise"
+            // Complex sum of sines
+            const f = 0.008; 
             return (
                 Math.sin(x * f + t) * 40 + 
                 Math.sin(x * f * 2.5 + t * 1.5) * 20 + 
@@ -225,124 +210,189 @@
             );
         }
 
-        // Right Side: Clean, separated, organized
-        function getCleanWave(index, x, t) {
-            const f = 0.008;
-            const harmonics = [1, 2.5, 5]; 
-            const amplitudes = [40, 20, 10];
-            const offsets = [-50, 0, 50]; // Vertical separation
-
-            const val = Math.sin(x * f * harmonics[index] + t * (index === 0 ? 1 : index === 1 ? 1.5 : 2));
-            return { 
-                y: val * amplitudes[index], 
-                offset: offsets[index] 
-            };
+        // Returns just the Y value for a simple sine
+        function getSimpleSine(x, t, freqMult, speedMult) {
+            const f = 0.01;
+            return Math.sin(x * f * freqMult + t * speedMult) * 30;
         }
 
-        /** * RENDER LOOP 
-         */
-        function animateCanvas() {
+        /** --- DRAWING LOGIC --- */
+
+        function draw() {
+            // Clear screen
             ctx.clearRect(0, 0, width, height);
             
-            // Draw Input (Chaos)
-            ctx.beginPath();
-            ctx.strokeStyle = colorChaos;
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = colorChaos;
-            
-            // Draw from Left edge to Center (minus logo radius approx 50px)
-            const centerX = width / 2;
-            
-            for (let x = 0; x <= centerX - 55; x += 2) {
-                const y = centerY + getChaoticWave(x, time);
-                if (x === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.stroke();
+            // 1. Draw Left Wave (Input)
+            // We animate the "limit" of the line based on leftProgress
+            if (state.phase !== 'intro') {
+                const startX = 0;
+                const endX = (centerX - logoRadius - 10); // Stop at logo surface
+                const currentLimit = startX + (endX - startX) * state.leftProgress;
 
-            // Draw Output (Order)
-            for (let i = 0; i < 3; i++) {
                 ctx.beginPath();
-                ctx.strokeStyle = colorsOrder[i];
-                ctx.lineWidth = 2;
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = colorsOrder[i];
+                ctx.strokeStyle = colorChaos;
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = colorChaos;
 
-                for (let x = centerX + 55; x <= width; x += 2) {
-                    // Match phase with input by using same Time and X
-                    const wave = getCleanWave(i, x, time);
-                    const y = centerY + wave.y + wave.offset;
-                    if (x === centerX + 55) ctx.moveTo(x, y);
+                for (let x = startX; x <= currentLimit; x += 3) {
+                    const y = centerY + getChaoticWave(x, state.time);
+                    if (x === startX) ctx.moveTo(x, y);
                     else ctx.lineTo(x, y);
                 }
                 ctx.stroke();
             }
 
-            time -= speed; // Move left to right (negative time moves wave right)
-            requestAnimationFrame(animateCanvas);
+            // 2. Draw Right Waves (Radiation Output)
+            if (state.rightProgress > 0) {
+                // Radiation Angles: -10deg, 0deg, +10deg
+                const angles = [-10 * (Math.PI/180), 0, 10 * (Math.PI/180)];
+                const speeds = [1.2, 1.0, 0.8]; // Different speeds for variety
+                const freqs = [1.5, 1.0, 2.0];  // Different frequencies
+
+                // The starting point for all output waves (Right surface of logo)
+                const originX = centerX + logoRadius; 
+                const originY = centerY;
+                
+                // Determine how far the wave has traveled
+                // Calculate max distance to corner of screen to ensure it fills
+                const maxDist = width; 
+                const currentDist = maxDist * state.rightProgress;
+
+                angles.forEach((angle, i) => {
+                    ctx.save();
+                    
+                    // Move coordinate system to the right edge of the logo
+                    ctx.translate(originX, originY);
+                    // Rotate the entire coordinate system
+                    ctx.rotate(angle);
+
+                    ctx.beginPath();
+                    ctx.strokeStyle = colorsOrder[i];
+                    ctx.lineWidth = 2;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = colorsOrder[i];
+
+                    // Draw line along the new LOCAL x-axis
+                    // From x=0 (logo surface) to currentDist
+                    for (let x = 0; x <= currentDist; x += 3) {
+                        // We use (x + originX) for the wave calc to keep continuity 
+                        // with the global time/space, but draw on local X
+                        const y = getSimpleSine(x + originX, state.time, freqs[i], speeds[i]);
+                        
+                        // Fade out the tip of the wave as it grows
+                        if (x > currentDist - 50 && state.phase === 'ejecting') {
+                            ctx.globalAlpha = 1 - (x - (currentDist - 50)) / 50;
+                        }
+
+                        if (x === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                    ctx.restore(); // Restore coordinate system for next wave
+                });
+            }
+
+            // Increment Time (Wave movement speed)
+            state.time -= 0.02;
+            requestAnimationFrame(draw);
         }
 
-        animateCanvas();
+        /** --- SEQUENCER --- */
+        // This handles the timing logic (Entrance -> Travel -> Delay -> Output)
 
-        /** * UI ANIMATIONS (Anime.js)
-         */
-        
-        // Create a timeline to orchestrate the entrance
-        const tl = anime.timeline({
-            easing: 'easeOutExpo',
-            duration: 1000
-        });
+        function startSequence() {
+            
+            // Step 1: UI Entrance (Text & Logo)
+            const tl = anime.timeline({ easing: 'easeOutExpo' });
+            
+            tl.add({
+                targets: ['.main-headline', '.sub-headline'],
+                translateY: [40, 0],
+                opacity: [0, 1],
+                duration: 1000,
+                delay: anime.stagger(200)
+            })
+            .add({
+                targets: '.logo-container',
+                scale: [0, 1],
+                opacity: [0, 1],
+                duration: 1200,
+                easing: 'easeOutElastic(1, .5)',
+                complete: () => {
+                    // Start Signal Travel
+                    state.phase = 'injecting';
+                    runSignalTravel();
+                }
+            }, '-=500');
 
-        tl
-        // 1. Hero Text fades in and slides up
-        .add({
-            targets: '.main-headline',
-            translateY: [50, 0],
-            opacity: [0, 1],
-            duration: 1200
-        })
-        .add({
-            targets: '.sub-headline',
-            translateY: [30, 0],
-            opacity: [0, 1],
-            duration: 1000
-        }, '-=800') // Overlap slightly
+            // Logo Breathing (Continuous)
+            anime({
+                targets: '.logo-container',
+                boxShadow: ['0 0 10px rgba(0, 242, 255, 0.1)', '0 0 50px rgba(0, 242, 255, 0.3)'],
+                borderColor: ['rgba(255, 255, 255, 0.15)', 'rgba(0, 242, 255, 0.6)'],
+                duration: 2500,
+                direction: 'alternate',
+                loop: true,
+                easing: 'easeInOutSine'
+            });
+        }
 
-        // 2. Logo pops in
-        .add({
-            targets: '.logo-container',
-            scale: [0, 1],
-            opacity: [0, 1],
-            duration: 1500,
-            easing: 'easeOutElastic(1, .5)'
-        }, '-=600')
+        function runSignalTravel() {
+            // Animate Left Signal travelling to center
+            anime({
+                targets: state,
+                leftProgress: [0, 1],
+                duration: 2500, // Takes 2.5s to reach logo
+                easing: 'linear',
+                begin: () => {
+                    // Fade in Left Label
+                    anime({ targets: '.label-box.left', opacity: [0,1], translateY: [20,0], duration: 800 });
+                },
+                complete: () => {
+                    state.phase = 'processing';
+                    runProcessingDelay();
+                }
+            });
+        }
 
-        // 3. Descriptive Labels slide in
-        .add({
-            targets: '.label-box',
-            translateY: [30, 0],
-            opacity: [0, 1],
-            delay: anime.stagger(200), // Delay between left and right label
-            duration: 1000
-        }, '-=1000');
+        function runProcessingDelay() {
+            // Simulate App "Thinking"
+            // Pulse the logo fast during processing
+            anime({
+                targets: '.logo-container',
+                scale: [1, 1.1],
+                duration: 300,
+                direction: 'alternate',
+                loop: 4, // 2 pulses
+                easing: 'easeInOutSine',
+                complete: () => {
+                    state.phase = 'ejecting';
+                    runOutputEjection();
+                }
+            });
+        }
 
-        // 4. Continuous Breathing Animation for Logo (Loop)
-        anime({
-            targets: '.logo-container',
-            boxShadow: [
-                '0 0 10px rgba(0, 242, 255, 0.1)', 
-                '0 0 40px rgba(0, 242, 255, 0.4)'
-            ],
-            borderColor: [
-                'rgba(255, 255, 255, 0.1)',
-                'rgba(0, 242, 255, 0.6)'
-            ],
-            duration: 3000,
-            direction: 'alternate',
-            loop: true,
-            easing: 'easeInOutSine'
-        });
+        function runOutputEjection() {
+            // Animate Right Signal shooting out
+            anime({
+                targets: state,
+                rightProgress: [0, 1],
+                duration: 2000,
+                easing: 'easeOutCubic',
+                begin: () => {
+                    // Fade in Right Label
+                    anime({ targets: '.label-box.right', opacity: [0,1], translateY: [20,0], duration: 800 });
+                },
+                complete: () => {
+                    state.phase = 'flowing'; // Animation runs indefinitely now
+                }
+            });
+        }
+
+        // Start everything
+        draw(); // Start render loop
+        startSequence(); // Start animation logic
 
     </script>
 </body>
