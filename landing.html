@@ -179,7 +179,7 @@
             <h1 class="primary-msg">
                 Real time progress in <br />
                 <span class="keyword">
-                    <span id="counter-span" class="keyword-gradient">1</span><span id="dashboard-text" class="keyword-gradient"> dashboard</span>
+                    <span id="counter-span" class="keyword-gradient">1</span><span id="dashboard-text" class="keyword-gradient"> DASHBOARD</span>
                 </span>
             </h1>
             <h2 class="secondary-msg">Unleash Total Visibility Across Every Build</h2>
@@ -280,7 +280,7 @@
             .add({
                 targets: '.primary-msg > .letter', // Direct children letters only (exclude keyword container logic)
                 translateY: ["1.1em", 0], translateZ: 0, opacity: [0, 1],
-                easing: "easeOutExpo", duration: 1200, delay: anime.stagger(30)
+                easing: "easeOutExpo", duration: 800, delay: anime.stagger(10)
             })
             
             // B. "1 dashboard" ENTRANCE + COUNTDOWN
@@ -291,7 +291,7 @@
                 opacity: [0, 1],
                 easing: "easeOutExpo", // Matches text slide
                 duration: 1200,
-                delay: anime.stagger(30) // Stagger letters
+                delay: anime.stagger(10) // Stagger letters
             }, "-=1000")
 
             // C. THE COUNTDOWN (Run in parallel with entrance)
@@ -315,7 +315,7 @@
             }, "-=1500") // Overlap significantly
             
             // E. Hold
-            .add({ duration: 1000 })
+            .add({ duration: 800 })
             
             // F. Reveal
             .add({

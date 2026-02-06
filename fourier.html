@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Intelligence Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #08080c;
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --accent-chaos: #ff3b3b;   /* Red for risks */
+            --accent-order: #00f2ff;   /* Cyan for clarity */
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- HERO SECTION (TEXT) --- */
+        .hero-container {
+            position: absolute;
+            top: 15%;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 10;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .main-headline {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.1;
+            margin-bottom: 20px;
+            opacity: 0; /* Animated in */
+            background: linear-gradient(180deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sub-headline {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+            opacity: 0; /* Animated in */
+        }
+
+        /* --- VISUALIZER STAGE --- */
+        .stage {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50%; /* Occupies bottom half */
+            display: flex;
+            align-items: center; /* This aligns logo vertically in the container */
+            justify-content: center;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* --- LOGO --- */
+        .logo-container {
+            position: absolute;
+            z-index: 20;
+            width: 100px;
+            height: 100px;
+            background: rgba(16, 16, 24, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Note: Top position is handled by flexbox in .stage, 
+               but we can fine tune with transform if needed */
+            backdrop-filter: blur(10px);
+            opacity: 0; /* Animated in */
+            box-shadow: 0 0 0 rgba(0, 242, 255, 0); 
+        }
+
+        .logo-text {
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: var(--accent-order);
+            text-transform: uppercase;
+        }
+
+        /* --- LABELS (FLOATING) --- */
+        .labels-container {
+            position: absolute;
+            bottom: 30%; /* Aligned roughly above the waves */
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10%;
+            box-sizing: border-box;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .label-box {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .label-box.left { text-align: right; margin-right: 60px; }
+        .label-box.right { text-align: left; margin-left: 60px; }
+
+        .label-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .label-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .text-chaos { color: var(--accent-chaos); text-shadow: 0 0 10px rgba(255, 59, 59, 0.4); }
+        .text-order { color: var(--accent-order); text-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
+
+        /* --- GRADIENT FADE --- */
+        .vignette {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, transparent 60%, var(--bg-color) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="hero-container">
+        <h1 class="main-headline">Turn Complexity into Clarity.</h1>
+        <p class="sub-headline">
+            Don't let hidden risks derail your progress. 
+            We analyze the noise of complex projects to give you total visibility 
+            on delays, risks, and performance.
+        </p>
+    </div>
+
+    <div class="stage">
+        <canvas id="waveCanvas"></canvas>
+        
+        <div class="logo-container" id="appLogo">
+            <span class="logo-text">AI<br>CORE</span>
+        </div>
+
+        <div class="labels-container">
+            <div class="label-box left">
+                <div class="label-title text-chaos">Project Complexity</div>
+                <div class="label-desc">Unseen Delays • Hidden Risks • Noise</div>
+            </div>
+            <div class="label-box right">
+                <div class="label-title text-order">Total Visibility</div>
+                <div class="label-desc">Performance Metrics • Clear Insights</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="vignette"></div>
+
+    <script>
+        /** * CANVAS SETUP 
+         */
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width, height, centerY;
+
+        // Configuration
+        // Note: Speed is significantly reduced here (0.015)
+        let time = 0; 
+        const speed = 0.05; 
+        const colorChaos = '#ff3b3b'; 
+        const colorsOrder = ['#00f2ff', '#4facfe', '#7000ff'];
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight * 0.5; // Canvas is bottom 50%
+            // The wave center is in the middle of the canvas (which is the bottom quarter of screen)
+            centerY = height / 2; 
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        /** * WAVE MATH 
+         */
+        
+        // Left Side: Noisy, jagged, unpredictable
+        function getChaoticWave(x, t) {
+            const f = 0.008; // Lower frequency for smoother look at slow speeds
+            // Sum of sines to create "noise"
+            return (
+                Math.sin(x * f + t) * 40 + 
+                Math.sin(x * f * 2.5 + t * 1.5) * 20 + 
+                Math.sin(x * f * 5 + t * 2) * 10
+            );
+        }
+
+        // Right Side: Clean, separated, organized
+        function getCleanWave(index, x, t) {
+            const f = 0.008;
+            const harmonics = [1, 2.5, 5]; 
+            const amplitudes = [40, 20, 10];
+            const offsets = [-50, 0, 50]; // Vertical separation
+
+            const val = Math.sin(x * f * harmonics[index] + t * (index === 0 ? 1 : index === 1 ? 1.5 : 2));
+            return { 
+                y: val * amplitudes[index], 
+                offset: offsets[index] 
+            };
+        }
+
+        /** * RENDER LOOP 
+         */
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw Input (Chaos)
+            ctx.beginPath();
+            ctx.strokeStyle = colorChaos;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = colorChaos;
+            
+            // Draw from Left edge to Center (minus logo radius approx 50px)
+            const centerX = width / 2;
+            
+            for (let x = 0; x <= centerX - 55; x += 2) {
+                const y = centerY + getChaoticWave(x, time);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // Draw Output (Order)
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.strokeStyle = colorsOrder[i];
+                ctx.lineWidth = 2;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = colorsOrder[i];
+
+                for (let x = centerX + 55; x <= width; x += 2) {
+                    // Match phase with input by using same Time and X
+                    const wave = getCleanWave(i, x, time);
+                    const y = centerY + wave.y + wave.offset;
+                    if (x === centerX + 55) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            time -= speed; // Move left to right (negative time moves wave right)
+            requestAnimationFrame(animateCanvas);
+        }
+
+        animateCanvas();
+
+        /** * UI ANIMATIONS (Anime.js)
+         */
+        
+        // Create a timeline to orchestrate the entrance
+        const tl = anime.timeline({
+            easing: 'easeOutExpo',
+            duration: 1000
+        });
+
+        tl
+        // 1. Hero Text fades in and slides up
+        .add({
+            targets: '.main-headline',
+            translateY: [50, 0],
+            opacity: [0, 1],
+            duration: 1200
+        })
+        .add({
+            targets: '.sub-headline',
+            translateY: [30, 0],
+            opacity: [0, 1],
+            duration: 1000
+        }, '-=800') // Overlap slightly
+
+        // 2. Logo pops in
+        .add({
+            targets: '.logo-container',
+            scale: [0, 1],
+            opacity: [0, 1],
+            duration: 1500,
+            easing: 'easeOutElastic(1, .5)'
+        }, '-=600')
+
+        // 3. Descriptive Labels slide in
+        .add({
+            targets: '.label-box',
+            translateY: [30, 0],
+            opacity: [0, 1],
+            delay: anime.stagger(200), // Delay between left and right label
+            duration: 1000
+        }, '-=1000');
+
+        // 4. Continuous Breathing Animation for Logo (Loop)
+        anime({
+            targets: '.logo-container',
+            boxShadow: [
+                '0 0 10px rgba(0, 242, 255, 0.1)', 
+                '0 0 40px rgba(0, 242, 255, 0.4)'
+            ],
+            borderColor: [
+                'rgba(255, 255, 255, 0.1)',
+                'rgba(0, 242, 255, 0.6)'
+            ],
+            duration: 3000,
+            direction: 'alternate',
+            loop: true,
+            easing: 'easeInOutSine'
+        });
+
+    </script>
+</body>
+</html>
