@@ -136,6 +136,11 @@
             z-index: 2;
         }
 
+        .img-div2 {
+            width: 80px;
+            height: 80px;
+        }
+
     </style>
 </head>
 <body>
@@ -152,8 +157,9 @@
         <canvas id="waveCanvas"></canvas>
         
         <div class="logo-container" id="appLogo">
-            <div class="logo-icon">💠</div>
-            <span class="logo-text">CORE</span>
+            <img src="img/Logo square.png" class="img-div2">
+            <!-- <div class="logo-icon">💠</div> -->
+            <!-- <span class="logo-text">CORE</span> -->
         </div>
 
         <div class="labels-container">
@@ -223,7 +229,7 @@
             // It travels from Left Edge (0) to Logo Surface (centerX - logoRadius)
             if (state.phase !== 'intro') {
                 const startX = 0;
-                const endX = centerX - logoRadius;
+                const endX = centerX;
                 
                 // Calculate current leading edge of the wave
                 const currentHeadX = startX + (endX - startX) * state.leftProgress;
@@ -248,12 +254,12 @@
             // 2. Draw Right Waves (Radiation Output)
             if (state.rightProgress > 0) {
                 // Radiation Angles: -20deg, 0deg, +20deg (Increased angle)
-                const angles = [-20 * (Math.PI/180), 0, 20 * (Math.PI/180)];
+                const angles = [-15 * (Math.PI/180), 0, 15 * (Math.PI/180)];
                 const speeds = [1.2, 1.0, 0.8]; 
                 const freqs = [1.5, 1.0, 2.0];  
 
-                // Origin is the RIGHT surface of the logo
-                const originX = centerX + logoRadius; 
+                // Origin is the RIGHT surface of the logo (maybe remove the logoRadius)
+                const originX = centerX; 
                 const originY = centerY;
                 
                 // Max draw distance (needs to clear screen corner)
