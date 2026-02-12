@@ -26,13 +26,14 @@
             width: 100vw;
         }
 
-        /* HERO TEXT */
+        /* --- HERO TEXT --- */
         .hero-container {
             position: absolute;
-            top: 15%;
+            top: 10%; 
             width: 100%;
             text-align: center;
             z-index: 10;
+            pointer-events: none; 
         }
 
         .main-headline {
@@ -54,7 +55,7 @@
             opacity: 0;
         }
 
-        /* CANVAS & STAGE */
+        /* --- STAGE & CANVAS --- */
         .stage {
             position: absolute;
             bottom: 0;
@@ -74,18 +75,16 @@
             z-index: 1;
         }
 
-        /* CENTER LOGO */
+        /* --- CENTER LOGO --- */
         .logo-container {
             position: absolute;
             z-index: 20;
-            /* 1.5x size */
             width: 150px;
             height: 150px;
             background: rgba(16, 16, 24, 0.6);
             border: 2px solid var(--glass-border);
             border-radius: 50%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(12px);
@@ -93,20 +92,28 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .logo-icon {
-            font-size: 40px;
-            margin-bottom: 5px;
+        .logo-wrapper {
+            width: 100%;
+            height: 100%;
+            position: relative;
         }
 
-        .logo-text {
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: var(--accent-order);
-            text-transform: uppercase;
+        /* --- ADJUST LOGO POSITION HERE --- */
+        .img-div2 {
+            width: 60%; 
+            height: auto;
+            display: block;
+            position: absolute;
+            left: 50%;
+            
+            /* CHANGE THIS VALUE TO ADJUST HEIGHT */
+            /* 50% is center. 48% moves it UP. 52% moves it DOWN. */
+            top: 45%; 
+            
+            transform: translate(-50%, -50%);
         }
 
-        /* LABELS */
+        /* --- INTERACTIVE LABELS --- */
         .labels-container {
             position: absolute;
             top: 20px;
@@ -115,30 +122,97 @@
             justify-content: space-between;
             padding: 0 5%;
             box-sizing: border-box;
-            pointer-events: none;
-            z-index: 5;
+            z-index: 30; 
+            pointer-events: none; 
         }
 
-        .label-box { opacity: 0; }
-        .label-box.left { text-align: right; margin-right: 100px; }
-        .label-box.right { text-align: left; margin-left: 100px; }
+        .label-box {
+            opacity: 0; 
+            pointer-events: auto; 
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label-box.left { align-items: flex-end; text-align: right; margin-right: 100px; }
+        .label-box.right { align-items: flex-start; text-align: left; margin-left: 100px; }
+
+        /* HEADER */
+        .label-header {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            padding: 5px;
+            transition: color 0.3s;
+        }
         
-        .label-title { font-weight: 700; text-transform: uppercase; margin-bottom: 4px;}
-        .label-desc { font-size: 0.85rem; color: var(--text-muted); }
+        .label-header:hover .label-title {
+            color: #fff;
+            text-shadow: 0 0 8px currentColor;
+        }
+
+        .label-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .caret {
+            font-size: 1rem;
+            margin: 0 10px;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+
         .text-chaos { color: var(--accent-chaos); }
         .text-order { color: var(--accent-order); }
 
+        /* --- DESCRIPTION BOX --- */
+        .label-content {
+            height: 0;
+            overflow: hidden;
+            opacity: 0;
+            margin-top: 10px;
+            position: relative; /* Needed for ::before positioning */
+        }
+
+        /* Background Layer (Soft Edges) */
+        .label-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(6, 6, 10, 0.75); 
+            backdrop-filter: blur(8px);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+            mask-image: radial-gradient(ellipse at center, black 50%, transparent 100%);
+            z-index: -1; 
+            border-radius: 16px;
+        }
+
+        /* Text Layer (Clear) */
+        .content-inner {
+            position: relative; 
+            padding: 25px;
+            font-size: 1.1rem;
+            color: #ffffff; 
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.9);
+            z-index: 1;
+        }
+
+        /* VIGNETTE */
         .vignette {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle, transparent 50%, var(--bg-color) 100%);
             pointer-events: none;
             z-index: 2;
-        }
-
-        .img-div2 {
-            width: 80px;
-            height: 80px;
         }
 
     </style>
@@ -157,42 +231,61 @@
         <canvas id="waveCanvas"></canvas>
         
         <div class="logo-container" id="appLogo">
-            <img src="img/Logo square.png" class="img-div2">
-            <!-- <div class="logo-icon">💠</div> -->
-            <!-- <span class="logo-text">CORE</span> -->
+            <div class="logo-wrapper">
+                <img src="img/Logo square.png" class="img-div2" alt="Logo">
+            </div>
         </div>
 
         <div class="labels-container">
+            
             <div class="label-box left">
-                <div class="label-title text-chaos">Raw Signal</div>
-                <div class="label-desc">Complex • Noisy • High Risk</div>
+                <div class="label-header" onclick="toggleDetails()">
+                    <span class="caret">▶</span>
+                    <span class="label-title text-chaos">Raw Signal</span>
+                </div>
+                <div class="label-content">
+                    <div class="content-inner">
+                        <p><strong>Unfiltered Complexity</strong></p>
+                        Our system ingests raw project data, identifying hidden bottlenecks and chaotic dependencies before they impact your timeline.
+                    </div>
+                </div>
             </div>
+
             <div class="label-box right">
-                <div class="label-title text-order">Analyzed Data</div>
-                <div class="label-desc">Structured • Clear • Optimized</div>
+                <div class="label-header" onclick="toggleDetails()">
+                    <span class="caret">▶</span>
+                    <span class="label-title text-order">Analyzed Data</span>
+                </div>
+                <div class="label-content">
+                    <div class="content-inner">
+                        <p><strong>Actionable Insights</strong></p>
+                        We convert noise into structured strategies. Gain total visibility into performance metrics with predicted outcomes.
+                    </div>
+                </div>
             </div>
+
         </div>
     </div>
 
     <div class="vignette"></div>
 
     <script>
+        /** --- CONFIG --- */
         const canvas = document.getElementById('waveCanvas');
         const ctx = canvas.getContext('2d');
         
         let width, height, centerY, centerX;
         const logoRadius = 75; 
-        
-        // Colors
         const colorChaos = '#ff3b3b';
         const colorsOrder = ['#00f2ff', '#4facfe', '#7000ff'];
 
-        // Animation State Management
         const state = {
-            phase: 'intro', // intro -> injecting -> processing -> ejecting -> flowing
-            leftProgress: 0, // 0 to 1
-            rightProgress: 0, // 0 to 1
-            time: 0
+            phase: 'intro', 
+            leftProgress: 0, 
+            rightProgress: 0, 
+            time: 0,
+            isDetailsExpanded: false,
+            currentRotation: 0
         };
 
         function resize() {
@@ -204,7 +297,7 @@
         window.addEventListener('resize', resize);
         resize();
 
-        /** --- WAVE FUNCTIONS --- */
+        /** --- WAVE LOGIC --- */
 
         function getChaoticWave(x, t) {
             const f = 0.008; 
@@ -220,18 +313,13 @@
             return Math.sin(x * f * freqMult + t * speedMult) * 30;
         }
 
-        /** --- DRAWING LOGIC --- */
-
         function draw() {
             ctx.clearRect(0, 0, width, height);
             
-            // 1. Draw Left Wave (Input)
-            // It travels from Left Edge (0) to Logo Surface (centerX - logoRadius)
+            // 1. Left Wave
             if (state.phase !== 'intro') {
                 const startX = 0;
-                const endX = centerX;
-                
-                // Calculate current leading edge of the wave
+                const endX = centerX - logoRadius/2;
                 const currentHeadX = startX + (endX - startX) * state.leftProgress;
 
                 ctx.beginPath();
@@ -239,10 +327,8 @@
                 ctx.lineWidth = 3;
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = colorChaos;
-                // Ensure opacity is full
                 ctx.globalAlpha = 1;
 
-                // We only draw up to 'currentHeadX'
                 for (let x = startX; x <= currentHeadX; x += 3) {
                     const y = centerY + getChaoticWave(x, state.time);
                     if (x === startX) ctx.moveTo(x, y);
@@ -251,42 +337,29 @@
                 ctx.stroke();
             }
 
-            // 2. Draw Right Waves (Radiation Output)
+            // 2. Right Waves
             if (state.rightProgress > 0) {
-                // Radiation Angles: -20deg, 0deg, +20deg (Increased angle)
                 const angles = [-15 * (Math.PI/180), 0, 15 * (Math.PI/180)];
                 const speeds = [1.2, 1.0, 0.8]; 
                 const freqs = [1.5, 1.0, 2.0];  
-
-                // Origin is the RIGHT surface of the logo (maybe remove the logoRadius)
-                const originX = centerX; 
+                const originX = centerX + logoRadius/2; 
                 const originY = centerY;
-                
-                // Max draw distance (needs to clear screen corner)
                 const maxDist = width; 
-                
-                // The wave length grows based on rightProgress
                 const currentWaveLength = maxDist * state.rightProgress;
 
                 angles.forEach((angle, i) => {
                     ctx.save();
-                    
-                    // Transform coordinates to rotate from the logo surface
                     ctx.translate(originX, originY);
                     ctx.rotate(angle);
-
                     ctx.beginPath();
                     ctx.strokeStyle = colorsOrder[i];
                     ctx.lineWidth = 2;
                     ctx.shadowBlur = 10;
                     ctx.shadowColor = colorsOrder[i];
-                    ctx.globalAlpha = 1; // Explicitly set full opacity
+                    ctx.globalAlpha = 1; 
 
-                    // Draw line along local X-axis from 0 to currentWaveLength
                     for (let x = 0; x <= currentWaveLength; x += 3) {
-                        // We use (x + originX) for math to keep continuity 
                         const y = getSimpleSine(x + originX, state.time, freqs[i], speeds[i]);
-                        
                         if (x === 0) ctx.moveTo(x, y);
                         else ctx.lineTo(x, y);
                     }
@@ -299,11 +372,9 @@
             requestAnimationFrame(draw);
         }
 
-        /** --- ANIMATION SEQUENCER --- */
+        /** --- ANIMATION SEQUENCE --- */
 
         function startSequence() {
-            
-            // 1. Entrance (Text & Logo)
             const tl = anime.timeline({ easing: 'easeOutExpo' });
             
             tl.add({
@@ -324,8 +395,8 @@
                     startSignalInjection();
                 }
             }, '-=500');
-
-            // 2. Continuous "Breathing" (Subtle idling animation)
+            
+            // Initial breathing
             anime({
                 targets: '.logo-container',
                 borderColor: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.3)'],
@@ -337,10 +408,9 @@
         }
 
         function startSignalInjection() {
-            // Animate Left Signal touching the logo
             anime({
                 targets: state,
-                leftProgress: [0, 1], // Goes from 0% to 100% of the path
+                leftProgress: [0, 1],
                 duration: 2000,
                 easing: 'linear',
                 begin: () => {
@@ -353,32 +423,45 @@
             });
         }
 
+        function triggerRotation() {
+            state.currentRotation += 120; 
+            anime({
+                targets: '.logo-wrapper',
+                rotate: state.currentRotation, 
+                duration: 1200, 
+                easing: 'easeInOutExpo'
+            });
+        }
+
         function startProcessing() {
-            // 3. The "Processing" Pulse (Stronger pumping action)
-            // This loop runs continuously now to simulate ongoing analysis
+            const beatDuration = 600;
+
+            // 1. Container Pump
             anime({
                 targets: '.logo-container',
                 scale: [1, 1.15],
                 boxShadow: ['0 0 10px rgba(0, 242, 255, 0.1)', '0 0 60px rgba(0, 242, 255, 0.5)'],
                 borderColor: ['rgba(255, 255, 255, 0.3)', 'rgba(0, 242, 255, 0.8)'],
-                duration: 600,
+                duration: beatDuration,
                 direction: 'alternate',
-                loop: true, // Keep pumping forever
+                loop: true,
                 easing: 'easeInOutSine'
             });
 
-            // Delay before outputting results (Simulate calculation time)
+            // 2. Rotation Loop
+            triggerRotation(); 
+            setInterval(triggerRotation, 1200); 
+
             setTimeout(() => {
                 state.phase = 'ejecting';
                 startOutputEjection();
-            }, 1000); // 1 second processing time
+            }, 1000); 
         }
 
         function startOutputEjection() {
-            // Animate Right Signals shooting out
             anime({
                 targets: state,
-                rightProgress: [0, 1], // Grow wave from 0 length to max length
+                rightProgress: [0, 1],
                 duration: 2000,
                 easing: 'easeOutCubic', 
                 begin: () => {
@@ -390,8 +473,54 @@
             });
         }
 
-        draw(); // Start Render Loop
-        startSequence(); // Start Logic Loop
+        /** --- INTERACTION --- */
+
+        function toggleDetails() {
+            state.isDetailsExpanded = !state.isDetailsExpanded;
+
+            const caretRotate = state.isDetailsExpanded ? 90 : 0;
+            const headerMove = state.isDetailsExpanded ? -10 : 0;
+
+            // 1. Rotate Carets
+            anime({
+                targets: '.caret',
+                rotate: caretRotate,
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+
+            // 2. Move Headers
+            anime({
+                targets: '.label-header',
+                translateY: headerMove,
+                duration: 300,
+                easing: 'easeOutQuad'
+            });
+
+            // 3. Expand/Collapse Content
+            if (state.isDetailsExpanded) {
+                // Expanding
+                anime({
+                    targets: '.label-content',
+                    height: function(el) { return el.scrollHeight; },
+                    opacity: 1,
+                    duration: 400,
+                    easing: 'easeOutCubic'
+                });
+            } else {
+                // Collapsing
+                anime({
+                    targets: '.label-content',
+                    height: 0,
+                    opacity: 0,
+                    duration: 400,
+                    easing: 'easeOutCubic'
+                });
+            }
+        }
+
+        draw(); 
+        startSequence();
 
     </script>
 </body>
