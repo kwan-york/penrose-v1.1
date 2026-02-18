@@ -26,8 +26,8 @@
             width: 100vw;
         }
 
-        /* --- HERO TEXT --- */
-        .hero-container {
+        /* --- d2 TEXT --- */
+        .div2-container {
             position: absolute;
             top: 10%; 
             width: 100%;
@@ -56,7 +56,7 @@
         }
 
         /* --- STAGE & CANVAS --- */
-        .stage {
+        .div2-stage {
             position: absolute;
             bottom: 0;
             width: 100%;
@@ -76,7 +76,7 @@
         }
 
         /* --- CENTER LOGO --- */
-        .logo-container {
+        .div2-logo-container {
             position: absolute;
             z-index: 20;
             width: 150px;
@@ -92,7 +92,7 @@
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
         }
 
-        .logo-wrapper {
+        .div2-logo-wrapper {
             width: 100%;
             height: 100%;
             position: relative;
@@ -219,7 +219,7 @@
 </head>
 <body>
 
-    <div class="hero-container">
+    <div class="div2-container">
         <h1 class="main-headline">Turn Complexity into Clarity.</h1>
         <p class="sub-headline">
             From raw, chaotic signals to clear actionable intelligence. 
@@ -227,12 +227,12 @@
         </p>
     </div>
 
-    <div class="stage">
-        <canvas id="waveCanvas"></canvas>
+    <div class="div2-stage">
+        <canvas id="div2-waveCanvas"></canvas>
         
-        <div class="logo-container" id="appLogo">
-            <div class="logo-wrapper">
-                <img src="img/Logo square.png" class="img-div2" alt="Logo">
+        <div class="div2-logo-container" id="div2-appLogo">
+            <div class="div2-logo-wrapper">
+                <img src="img/Logo square.png" class="img-div2" alt="Penrose">
             </div>
         </div>
 
@@ -271,7 +271,7 @@
 
     <script>
         /** --- CONFIG --- */
-        const canvas = document.getElementById('waveCanvas');
+        const canvas = document.getElementById('div2-waveCanvas');
         const ctx = canvas.getContext('2d');
         
         let width, height, centerY, centerX;
@@ -385,7 +385,7 @@
                 delay: anime.stagger(200)
             })
             .add({
-                targets: '.logo-container',
+                targets: '.div2-logo-container',
                 scale: [0, 1],
                 opacity: [0, 1],
                 duration: 1200,
@@ -398,7 +398,7 @@
             
             // Initial breathing
             anime({
-                targets: '.logo-container',
+                targets: '.div2-logo-container',
                 borderColor: ['rgba(255, 255, 255, 0.15)', 'rgba(255, 255, 255, 0.3)'],
                 duration: 3000,
                 direction: 'alternate',
@@ -426,7 +426,7 @@
         function triggerRotation() {
             state.currentRotation += 120; 
             anime({
-                targets: '.logo-wrapper',
+                targets: '.div2-logo-wrapper',
                 rotate: state.currentRotation, 
                 duration: 1200, 
                 easing: 'easeInOutExpo'
@@ -438,7 +438,7 @@
 
             // 1. Container Pump
             anime({
-                targets: '.logo-container',
+                targets: '.div2-logo-container',
                 scale: [1, 1.15],
                 boxShadow: ['0 0 10px rgba(0, 242, 255, 0.1)', '0 0 60px rgba(0, 242, 255, 0.5)'],
                 borderColor: ['rgba(255, 255, 255, 0.3)', 'rgba(0, 242, 255, 0.8)'],
